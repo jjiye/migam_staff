@@ -23,8 +23,8 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 
 /* ── 로그인 ── */
 #login-overlay{position:fixed;inset:0;background:rgba(220,222,235,.92);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:999;}
-.login-box{background:#fff;border:1px solid var(--border);border-radius:20px;padding:36px 40px;width:380px;box-shadow:0 8px 40px rgba(0,0,0,.12);}
-.login-logo{font-size:20px;font-weight:900;color:var(--text);text-align:center;margin-bottom:24px;}
+.login-box{background:#fff;border:1px solid var(--border);border-radius:20px;padding:36px 40px;width:380px;box-shadow:0 8px 40px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:16px;}
+.login-logo{font-size:20px;font-weight:900;color:var(--text);text-align:center;}
 .login-logo span{color:var(--theme);}
 .login-step{display:none;flex-direction:column;gap:14px;}
 .login-step.active{display:flex;}
@@ -145,8 +145,7 @@ tr.add-row td{background:var(--bg);padding:6px 10px;}
 .add-hint{font-size:10px;color:var(--text3);}
 
 /* ── 메시지 섹션 ── */
-.msg-section{flex-shrink:0;background:var(--bg2);border-top:2px solid var(--border);padding:10px 16px;display:none;}
-.msg-section.visible{display:block;}
+.msg-section{flex-shrink:0;background:var(--bg2);border-top:2px solid var(--border);padding:10px 16px;}
 
 /* 일반 사용자: 발송 폼 */
 .msg-send-form{display:flex;align-items:center;gap:8px;}
@@ -251,18 +250,16 @@ tr.add-row td{background:var(--bg);padding:6px 10px;}
 <!-- 캘린더 -->
 <div class="cal-wrap"><table id="cal"></table></div>
 
-<!-- 메시지 섹션 -->
-<div class="msg-section" id="msg-section">
-  <!-- 내용은 renderMsgSection()이 채움 -->
-</div>
+<!-- 메시지 섹션 (로그인 전 숨김, 로그인 후 JS로 표시) -->
+<div id="msg-section" style="display:none;flex-shrink:0;background:#fff;border-top:2px solid #e2e4ef;padding:10px 16px;"></div>
 
 <script>
 // ── 상수 ──────────────────────────────────────────────────────────
 const VIEW_PW = '0000';
 const ADMINS = [
-  { name:'김근호', pw:'kgh2026!', editStores:[0,1], permLabel:'심야식당기억·남산기억 수정' },
-  { name:'박경규', pw:'pkr2026!', editStores:[0],   permLabel:'심야식당기억 수정 / 남산기억 보기' },
-  { name:'안봉호', pw:'abh2026!', editStores:[1],   permLabel:'남산기억 수정 / 심야식당기억 보기' },
+  { name:'김근호', pw:'skatksrldjr1!', editStores:[0,1], permLabel:'심야식당기억·남산기억 수정' },
+  { name:'박경규', pw:'pkg1!',         editStores:[0],   permLabel:'심야식당기억 수정 / 남산기억 보기' },
+  { name:'안봉호', pw:'abh1!',         editStores:[1],   permLabel:'남산기억 수정 / 심야식당기억 보기' },
 ];
 const COLORS = ['#43a047','#1e88e5','#fb8c00','#8e24aa','#c0ca33','#ff8a65','#00897b','#e91e63','#6d4c41','#0288d1'];
 const DOW = ['일','월','화','수','목','금','토'];
@@ -390,8 +387,8 @@ async function clearMessages(){
 
 function renderMsgSection(){
   const sec=document.getElementById('msg-section');
+  sec.style.display='block'; // 반드시 직접 style로 표시
   if(IS_ADMIN){
-    sec.classList.add('visible');
     const sorted=[...MESSAGES].reverse().slice(0,50);
     const items=sorted.length
       ? sorted.map(m=>{
@@ -407,7 +404,6 @@ function renderMsgSection(){
       </div>
       <div class="msg-list">${items}</div>`;
   }else{
-    sec.classList.add('visible');
     sec.innerHTML=`<div class="msg-send-form">
       <span class="msg-send-label">💬 관리자에게</span>
       <input class="msg-name-inp" id="msg-name-inp" placeholder="이름" maxlength="10"
@@ -657,8 +653,7 @@ function doLogout(){
   document.getElementById('pw-input').value='';document.getElementById('login-err').textContent='';
   gotoStep('role');
   document.getElementById('login-overlay').style.display='flex';
-  document.getElementById('msg-section').classList.remove('visible');
-  document.getElementById('msg-section').innerHTML='';
+  const ms=document.getElementById('msg-section');ms.style.display='none';ms.innerHTML='';
 }
 
 // ── 매장 탭 ──────────────────────────────────────────────────────
@@ -739,7 +734,7 @@ function render(){
         }else{td.style.background=color;}
       }
       const eff2=pt?getEffectiveHours(st,y,m,name,d):null;
-      td.title=`${name} ${m}/${d}(${DOW[w]}) · ${isWork?'근무':'휴무'}`+(eff2?` · ${fmtFull(eff2.s,eff2.e)}${eff2.isOverride?' ✏변경됨':' (기본)'}':'');
+      td.title=`${name} ${m}/${d}(${DOW[w]}) · ${isWork?'근무':'휴무'}`+(eff2?` · ${fmtFull(eff2.s,eff2.e)}${eff2.isOverride?' ✏변경됨':' (기본)'}`:'');
       if(editable)td.onclick=((_n,_d,_p)=>()=>handleCellClick(_n,_d,_p))(name,d,pt);
       tr.appendChild(td);
     }
