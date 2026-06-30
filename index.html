@@ -6,111 +6,139 @@
 <title>직원 근무 관리</title>
 <style>
 :root{
-  color-scheme:dark;
-  --theme:#0F7711;
-  --theme-light:#6fcf72;
-  --theme-bg:rgba(15,119,17,.15);
+  color-scheme:light;
+  --theme:#0F7711;--theme-light:#2a9e2e;--theme-bg:rgba(15,119,17,.08);
+  --bg:#f4f5f9;--bg2:#ffffff;--bg3:#f8f9fc;
+  --text:#1a1c2e;--text2:#5a5c78;--text3:#9a9cb8;
+  --border:#e2e4ef;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
-  background:#0a0b14;color:#e2e0f0;
-  display:flex;flex-direction:column;height:100vh;overflow:hidden;
-}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 body.view-only td.day-cell{cursor:default;}
 
 /* ── 로그인 ── */
-#login-overlay{position:fixed;inset:0;background:rgba(8,9,18,.95);display:flex;align-items:center;justify-content:center;z-index:999;}
-.login-box{background:#131523;border:1px solid #2e2c4e;border-radius:16px;padding:36px 40px;width:340px;display:flex;flex-direction:column;gap:20px;}
-.login-logo{font-size:20px;font-weight:900;color:#c5c3e0;text-align:center;}
-.login-logo span{color:var(--theme-light);}
-.login-hint{font-size:11px;color:#4b4980;text-align:center;margin-top:-10px;}
-.login-label{font-size:12px;color:#8b89a8;font-weight:600;margin-bottom:6px;}
-.login-inp{width:100%;background:#0a0b14;border:1.5px solid #2e2c4e;border-radius:8px;padding:10px 14px;color:#e2e0f0;font-size:15px;outline:none;transition:border-color .2s;}
-.login-inp:focus{border-color:var(--theme-light);}
-.login-btn{width:100%;padding:12px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:14px;font-weight:800;cursor:pointer;}
-.login-btn:hover{filter:brightness(1.3);}
-.login-err{font-size:12px;color:#f87171;text-align:center;min-height:16px;}
+#login-overlay{position:fixed;inset:0;background:rgba(220,222,235,.92);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:999;}
+.login-box{background:#fff;border:1px solid var(--border);border-radius:20px;padding:40px 44px;width:360px;display:flex;flex-direction:column;gap:22px;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+.login-logo{font-size:22px;font-weight:900;color:var(--text);text-align:center;}
+.login-logo span{color:var(--theme);}
+.role-select{display:flex;gap:10px;}
+.role-btn{flex:1;padding:18px 10px;border-radius:12px;border:2px solid var(--border);background:#f8f9fc;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .15s;font-family:inherit;}
+.role-btn:hover{border-color:var(--theme);background:var(--theme-bg);}
+.role-btn .role-icon{font-size:28px;}
+.role-btn .role-name{font-size:13px;font-weight:800;color:var(--text);}
+.role-btn .role-desc{font-size:10px;color:var(--text3);}
+.pw-step{display:none;flex-direction:column;gap:16px;}
+.pw-step.active{display:flex;}
+.back-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;text-align:left;padding:0;font-family:inherit;}
+.back-btn:hover{color:var(--text2);}
+.selected-role{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--theme-bg);border-radius:8px;font-size:13px;font-weight:700;color:var(--theme);}
+.login-label{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:6px;}
+.login-inp{width:100%;background:#f8f9fc;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:15px;outline:none;transition:border-color .2s;font-family:inherit;}
+.login-inp:focus{border-color:var(--theme);}
+.login-btn-main{width:100%;padding:12px;border-radius:10px;border:none;background:var(--theme);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+.login-btn-main:hover{filter:brightness(1.1);}
+.login-err{font-size:12px;color:#e03030;text-align:center;min-height:16px;}
 
 /* ── 로딩 ── */
-#loading-overlay{position:fixed;inset:0;background:rgba(8,9,18,.85);display:none;align-items:center;justify-content:center;z-index:998;flex-direction:column;gap:14px;}
-.spinner{width:36px;height:36px;border:3px solid #2e2c4e;border-top-color:var(--theme-light);border-radius:50%;animation:spin .7s linear infinite;}
+#loading-overlay{position:fixed;inset:0;background:rgba(240,241,249,.88);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:998;flex-direction:column;gap:14px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--theme);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.loading-txt{font-size:13px;color:#8b89a8;}
+.loading-txt{font-size:13px;color:var(--text3);}
+
+/* ── 기본 근무시간 설정 모달 ── */
+#dh-modal{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;align-items:center;justify-content:center;z-index:900;}
+#dh-modal.open{display:flex;}
+.dh-box{background:#fff;border-radius:16px;padding:28px;width:400px;max-height:80vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:16px;}
+.dh-title{font-size:15px;font-weight:900;color:var(--text);}
+.dh-subtitle{font-size:11px;color:var(--text3);margin-top:-10px;line-height:1.5;}
+.dh-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.dh-row:last-of-type{border-bottom:none;}
+.dh-name{font-size:13px;font-weight:700;color:var(--text);min-width:80px;}
+.dh-time-wrap{display:flex;align-items:center;gap:6px;flex:1;}
+.dh-time-inp{background:#f8f9fc;border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;font-weight:600;padding:5px 8px;outline:none;width:72px;text-align:center;font-family:monospace;transition:border-color .2s;}
+.dh-time-inp:focus{border-color:var(--theme);}
+.dh-sep{color:var(--text3);font-size:13px;font-weight:700;}
+.dh-clear{padding:3px 8px;border-radius:5px;border:1.5px solid var(--border);background:#fff;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.dh-clear:hover{border-color:#e03030;color:#e03030;}
+.dh-actions{display:flex;gap:8px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border);}
+.dh-cancel{padding:8px 18px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;}
+.dh-save{padding:8px 20px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
 
 /* ── 헤더 ── */
-.hdr{background:#07080f;border-bottom:1px solid #1e2038;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
-.hdr-title{font-size:14px;font-weight:800;color:#c5c3e0;white-space:nowrap;}
-.month-nav{display:flex;align-items:center;gap:6px;background:#131523;border:1px solid #1e2038;border-radius:8px;padding:4px 10px;}
-.month-nav button{background:none;border:none;color:#a09ec0;font-size:16px;cursor:pointer;padding:0 2px;}
-.month-nav button:hover{color:var(--theme-light);}
-.month-label{font-size:15px;font-weight:800;min-width:80px;text-align:center;}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.hdr-title{font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;}
+.month-nav{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 10px;}
+.month-nav button{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:0 2px;}
+.month-nav button:hover{color:var(--theme);}
+.month-label{font-size:15px;font-weight:800;min-width:80px;text-align:center;color:var(--text);}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
 .badge-admin{padding:4px 10px;border-radius:6px;background:#ffd600;color:#1a237e;font-size:11px;font-weight:800;}
-.badge-view{padding:4px 10px;border-radius:6px;background:#2e2c4e;color:#a09ec0;font-size:11px;font-weight:700;}
-.logout-btn{padding:4px 10px;border-radius:6px;border:1.5px solid #2e2c4e;background:transparent;color:#8b89a8;font-size:11px;font-weight:700;cursor:pointer;}
-.logout-btn:hover{border-color:#f87171;color:#f87171;}
-.seed-btn{padding:4px 12px;border-radius:6px;border:1.5px solid #4b4980;background:transparent;color:#a09ec0;font-size:11px;font-weight:700;cursor:pointer;display:none;}
-.seed-btn:hover{border-color:var(--theme-light);color:var(--theme-light);}
+.badge-view{padding:4px 10px;border-radius:6px;background:#e8e8f4;color:var(--text2);font-size:11px;font-weight:700;}
+.logout-btn{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;}
+.logout-btn:hover{border-color:#e03030;color:#e03030;}
 
-/* ── 매장 탭 바 ── */
-.store-tabbar{display:flex;flex-shrink:0;background:#07080f;border-bottom:2px solid #1e2038;}
-.stab{flex:1;padding:11px 0;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:#4b4980;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap;user-select:none;}
-.stab:hover{color:#a09ec0;}
-.stab.active{color:#e2e0f0;border-bottom-color:#818cf8;}
+/* ── 매장 탭 ── */
+.store-tabbar{display:flex;flex-shrink:0;background:var(--bg2);border-bottom:2px solid var(--border);}
+.stab{flex:1;padding:11px 0;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--text3);border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap;user-select:none;}
+.stab:hover{color:var(--text2);}
+.stab.active{color:var(--text);border-bottom-color:var(--theme);}
 
 /* ── 캘린더 ── */
-.cal-wrap{flex:1;min-height:0;overflow-x:auto;overflow-y:auto;padding:10px 16px 6px;}
-table{border-collapse:collapse;min-width:100%;background:#131523;border-radius:10px;overflow:hidden;}
-th,td{border:1px solid #1e2038;text-align:center;vertical-align:middle;white-space:nowrap;}
+.cal-wrap{flex:1;min-height:0;overflow-x:auto;overflow-y:auto;padding:12px 16px 8px;}
+table{border-collapse:collapse;min-width:100%;background:var(--bg2);border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+th,td{border:1px solid var(--border);text-align:center;vertical-align:middle;white-space:nowrap;}
 
-th.col-name{width:110px;min-width:110px;background:#0e0f1e;font-size:13px;font-weight:700;padding:6px 8px;position:sticky;left:0;z-index:2;}
-th.col-cnt{width:76px;min-width:76px;background:#0e0f1e;font-size:11px;padding:4px 6px;position:sticky;right:76px;z-index:2;}
-th.col-hrs{width:76px;min-width:76px;background:#0e0f1e;font-size:11px;padding:4px 6px;position:sticky;right:0;z-index:2;}
-th.col-day{min-width:30px;width:30px;font-size:12px;padding:4px 2px;background:#0e0f1e;}
-th.col-day.sun{color:#f87171;background:#150808;}
-th.col-day.sat{color:#90caf9;background:#080e18;}
+th.col-name{width:110px;min-width:110px;background:var(--bg3);font-size:13px;font-weight:700;padding:6px 8px;position:sticky;left:0;z-index:2;color:var(--text);}
+th.col-cnt{width:76px;min-width:76px;background:var(--bg3);font-size:11px;padding:4px 6px;position:sticky;right:110px;z-index:2;color:var(--text2);}
+th.col-hrs{width:110px;min-width:110px;background:var(--bg3);font-size:11px;padding:6px 6px;position:sticky;right:0;z-index:2;color:var(--text2);line-height:1.5;}
+.set-dh-btn{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:5px;border:1.5px solid var(--border);background:#fff;color:var(--theme);font-size:10px;font-weight:800;cursor:pointer;font-family:inherit;}
+.set-dh-btn:hover{background:var(--theme-bg);}
+th.col-day{min-width:30px;width:30px;font-size:12px;padding:4px 2px;background:var(--bg3);color:var(--text2);}
+th.col-day.sun{color:#cc2222;background:#fff8f8;}
+th.col-day.sat{color:#2244bb;background:#f8f8ff;}
 th.dow{font-size:12px;}
 th.date-num{font-size:13px;font-weight:700;}
 
 /* 이름 셀 */
-td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:#0e0f1e;position:sticky;left:0;z-index:1;min-width:110px;text-align:left;}
+td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:var(--bg3);position:sticky;left:0;z-index:1;min-width:110px;text-align:left;}
 .name-inner{display:flex;align-items:center;gap:0;width:100%;}
 .name-bar{width:3px;flex-shrink:0;align-self:stretch;border-radius:1px;}
-.name-text{flex:1;padding:7px 8px;font-size:14px;font-weight:700;cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;}
-.name-text:hover{color:#818cf8;}
+.name-text{flex:1;padding:7px 8px;font-size:14px;font-weight:700;cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.name-text:hover{color:var(--theme);}
 .name-text.readonly{cursor:default;}
-.name-text.readonly:hover{color:inherit;}
-.name-edit-inp{flex:1;background:#0a0b14;border:1.5px solid var(--theme-light);border-radius:4px;color:#e2e0f0;font-size:13px;font-weight:700;padding:4px 8px;outline:none;min-width:0;}
-.del-btn{flex-shrink:0;width:18px;height:18px;border-radius:4px;border:none;background:#3d1a1a;color:#f87171;font-size:11px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;margin-right:4px;}
+.name-text.readonly:hover{color:var(--text);}
+.name-edit-inp{flex:1;background:#fff;border:1.5px solid var(--theme);border-radius:4px;color:var(--text);font-size:13px;font-weight:700;padding:4px 8px;outline:none;min-width:0;font-family:inherit;}
+.del-btn{flex-shrink:0;width:18px;height:18px;border-radius:4px;border:none;background:#ffe8e8;color:#d05050;font-size:11px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;margin-right:4px;}
 td.name-cell:hover .del-btn{opacity:1;}
 
-/* 카운트 셀 */
-td.cnt-cell{font-size:10px;padding:4px 6px;background:#0e0f1e;position:sticky;right:76px;z-index:1;line-height:1.6;color:#8b89a8;}
-td.cnt-cell .w{color:#a5d6a7;}
-td.cnt-cell .o{color:#f48fb1;}
+td.cnt-cell{font-size:10px;padding:4px 6px;background:var(--bg3);position:sticky;right:110px;z-index:1;line-height:1.6;color:var(--text3);}
+td.cnt-cell .w{color:#2a8a30;font-weight:700;}
+td.cnt-cell .o{color:#bb3355;font-weight:700;}
 
-/* 근무시간 셀 */
-td.hrs-cell{font-size:10px;padding:4px 8px;background:#0e0f1e;position:sticky;right:0;z-index:1;color:#8b89a8;min-width:76px;line-height:1.6;}
-td.hrs-cell .hv{color:#ffd600;font-weight:700;font-size:12px;}
-td.hrs-cell .hm{color:#3a3a5c;}
+td.hrs-cell{font-size:10px;padding:5px 8px;background:var(--bg3);position:sticky;right:0;z-index:1;color:var(--text3);min-width:110px;line-height:1.8;text-align:center;}
+td.hrs-cell .hv{display:block;color:#b07000;font-weight:800;font-size:13px;}
+td.hrs-cell .hdef{display:block;font-size:9px;color:var(--text3);}
+td.hrs-cell .hno{display:block;font-size:9px;color:#e08030;}
 
 /* 날짜 셀 */
-td.day-cell{width:30px;min-width:30px;height:36px;cursor:pointer;transition:filter .1s;position:relative;}
-td.day-cell:hover{filter:brightness(1.3);}
-td.day-cell.off{background:#0d0e1c;}
-td.day-cell.off.sun-col{background:#150808;}
-td.day-cell.off.sat-col{background:#080e18;}
-.hrs-badge{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:8px;color:rgba(255,255,255,0.92);font-weight:700;pointer-events:none;line-height:1;}
+td.day-cell{width:30px;min-width:30px;height:38px;cursor:pointer;transition:filter .1s;position:relative;}
+td.day-cell:hover{filter:brightness(.92);}
+td.day-cell.off{background:#f5f5fa;}
+td.day-cell.off.sun-col{background:#fff5f5;}
+td.day-cell.off.sat-col{background:#f5f5ff;}
+.cell-badge{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:7px;color:rgba(255,255,255,.95);font-weight:700;pointer-events:none;line-height:1;white-space:nowrap;letter-spacing:-.3px;}
 
-/* 직원 추가 행 */
-tr.add-row td{background:#0a0b14;padding:6px 10px;}
+/* 주 구분선 */
+.week-sep{border-right:2px solid #b8b8d0 !important;}
+
+/* 직원 추가 */
+tr.add-row td{background:var(--bg);padding:6px 10px;}
 .add-row-inner{display:flex;align-items:center;gap:8px;}
-.add-name-inp{background:#131523;border:1.5px solid #2e2c4e;border-radius:6px;color:#e2e0f0;font-size:12px;padding:4px 10px;outline:none;width:130px;}
-.add-name-inp:focus{border-color:var(--theme-light);}
-.add-name-btn{padding:4px 12px;border-radius:6px;border:none;background:var(--theme);color:#fff;font-size:12px;font-weight:700;cursor:pointer;opacity:.85;}
-.add-name-btn:hover{opacity:1;}
-.add-hint{font-size:10px;color:#4b4980;}
+.add-name-inp{background:#fff;border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:4px 10px;outline:none;width:130px;font-family:inherit;}
+.add-name-inp:focus{border-color:var(--theme);}
+.add-name-btn{padding:4px 12px;border-radius:6px;border:none;background:var(--theme);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.add-name-btn:hover{opacity:.88;}
+.add-hint{font-size:10px;color:var(--text3);}
 </style>
 </head>
 <body>
@@ -125,14 +153,42 @@ tr.add-row td{background:#0a0b14;padding:6px 10px;}
 <div id="login-overlay">
   <div class="login-box">
     <div class="login-logo">📅 근무 일정 <span>관리</span></div>
-    <p class="login-hint">관리자 또는 일반 비밀번호로 로그인하세요</p>
-    <div>
-      <div class="login-label">비밀번호</div>
-      <input class="login-inp" id="pw-input" type="password" placeholder="비밀번호를 입력하세요"
-        onkeydown="if(event.key==='Enter') submitLogin()">
+    <div class="role-select" id="role-select">
+      <button class="role-btn" onclick="selectRole('admin')">
+        <span class="role-icon">👑</span>
+        <span class="role-name">관리자</span>
+        <span class="role-desc">일정 편집 가능</span>
+      </button>
+      <button class="role-btn" onclick="selectRole('view')">
+        <span class="role-icon">👁</span>
+        <span class="role-name">일반</span>
+        <span class="role-desc">일정 조회만 가능</span>
+      </button>
     </div>
-    <button class="login-btn" onclick="submitLogin()">로그인</button>
-    <div class="login-err" id="login-err"></div>
+    <div class="pw-step" id="pw-step">
+      <button class="back-btn" onclick="backToRole()">← 뒤로가기</button>
+      <div class="selected-role" id="selected-role-label"></div>
+      <div>
+        <div class="login-label">비밀번호</div>
+        <input class="login-inp" id="pw-input" type="password" placeholder="비밀번호를 입력하세요"
+          onkeydown="if(event.key==='Enter')submitLogin()">
+      </div>
+      <button class="login-btn-main" onclick="submitLogin()">로그인</button>
+      <div class="login-err" id="login-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 기본 근무시간 설정 모달 -->
+<div id="dh-modal">
+  <div class="dh-box">
+    <div class="dh-title">⏱ PT직원 기본 근무시간 설정</div>
+    <div class="dh-subtitle">직원별 기본 시간대를 설정하면 근무일 전체에 적용됩니다.<br>특정 날짜만 다를 경우 해당 셀을 더블클릭해 변경하세요.</div>
+    <div id="dh-staff-list"></div>
+    <div class="dh-actions">
+      <button class="dh-cancel" onclick="closeDhModal()">취소</button>
+      <button class="dh-save" onclick="saveDhModal()">저장</button>
+    </div>
   </div>
 </div>
 
@@ -145,7 +201,7 @@ tr.add-row td{background:#0a0b14;padding:6px 10px;}
     <button onclick="changeMonth(1)">▶</button>
   </div>
   <div class="hdr-right">
-      <span id="role-badge"></span>
+    <span id="role-badge"></span>
     <button class="logout-btn" onclick="doLogout()">로그아웃</button>
   </div>
 </div>
@@ -154,9 +210,7 @@ tr.add-row td{background:#0a0b14;padding:6px 10px;}
 <div class="store-tabbar" id="store-tabbar"></div>
 
 <!-- 캘린더 -->
-<div class="cal-wrap">
-  <table id="cal"></table>
-</div>
+<div class="cal-wrap"><table id="cal"></table></div>
 
 <script>
 // ── 상수 ──────────────────────────────────────────────────────────
@@ -164,10 +218,9 @@ const ADMIN_PW = 'rldjralrka1!';
 const VIEW_PW  = '0000';
 const COLORS   = ['#43a047','#1e88e5','#fb8c00','#8e24aa','#c0ca33','#ff8a65','#00897b','#e91e63','#6d4c41','#0288d1'];
 const DOW      = ['일','월','화','수','목','금','토'];
-
 const STORE_THEMES = [
-  { base:'#0F7711', light:'#6fcf72', bg:'rgba(15,119,17,.15)' }, // 심야식당기억
-  { base:'#0F2477', light:'#7b9cff', bg:'rgba(15,36,119,.15)' }, // 남산기억
+  { base:'#0F7711', light:'#2a9e2e', bg:'rgba(15,119,17,.08)' },
+  { base:'#0F2477', light:'#1a3aaa', bg:'rgba(15,36,119,.08)' },
 ];
 const DEFAULT_STORES = [
   { name:'심야식당기억', staff:['박경규','안준식','양서준','최예찬','장소영PT','하우승PT','이시헌PT'] },
@@ -176,59 +229,61 @@ const DEFAULT_STORES = [
 
 // ── 전역 상태 ──────────────────────────────────────────────────────
 let IS_ADMIN = false;
+let ROLE_SEL = null;
 let STORES   = JSON.parse(JSON.stringify(DEFAULT_STORES));
-const _now   = new Date();
-let S = {
-  year:2026, month:7, store:0,
-  schedule:{}, hours:{},
-};
+let S = { year:2026, month:7, store:0, schedule:{}, hours:{} };
 
 // ── Supabase ───────────────────────────────────────────────────────
 const SUPA_URL = 'https://ybmcynfrzlxnarorfkqi.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlibWN5bmZyemx4bmFyb3Jma3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzI0MTYsImV4cCI6MjA5NzE0ODQxNn0.HVE2EI72S2EJ2Nr7U5X6nQGyoz2mgdQZhYMfxZW4Ugo';
 const SUPA_HDR = { 'apikey':SUPA_KEY, 'Authorization':`Bearer ${SUPA_KEY}`, 'Content-Type':'application/json' };
 
-function showLoading(msg='데이터 불러오는 중...'){ document.getElementById('loading-txt').textContent=msg; document.getElementById('loading-overlay').style.display='flex'; }
-function hideLoading(){ document.getElementById('loading-overlay').style.display='none'; }
+function showLoading(msg='데이터 불러오는 중...'){document.getElementById('loading-txt').textContent=msg;document.getElementById('loading-overlay').style.display='flex';}
+function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
 
 // ── 저장 ──────────────────────────────────────────────────────────
 async function save(){
-  localStorage.setItem('cal5_stores',JSON.stringify(STORES));
-  localStorage.setItem('cal5_state', JSON.stringify(S));
+  localStorage.setItem('cal5_stores', JSON.stringify(STORES));
+  localStorage.setItem('cal5_state',  JSON.stringify(S));
   fetch(`${SUPA_URL}/rest/v1/cal_data?id=eq.main`,{
     method:'PATCH', headers:SUPA_HDR,
-    body:JSON.stringify({stores:STORES,schedule:S.schedule,hours:S.hours,updated_at:new Date().toISOString()}),
+    body:JSON.stringify({stores:STORES, schedule:S.schedule, hours:S.hours, updated_at:new Date().toISOString()}),
   }).catch(e=>console.warn('Cloud save failed:',e));
 }
 
 // ── 로드 ──────────────────────────────────────────────────────────
 async function load(){
+  // 마지막 선택 월 복원
+  try{
+    const rv=localStorage.getItem('cal5_state');
+    if(rv){const sv=JSON.parse(rv);if(sv.year)S.year=sv.year;if(sv.month)S.month=sv.month;if(sv.store!==undefined)S.store=sv.store;}
+  }catch(e){}
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/cal_data?id=eq.main&select=stores,schedule,hours`,{headers:SUPA_HDR});
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
     const data=await res.json();
     if(data[0]){
       if(data[0].stores){STORES.length=0;data[0].stores.forEach(s=>STORES.push(s));}
       S.schedule=data[0].schedule||{};
       S.hours   =data[0].hours   ||{};
-    } else {
-      await fetch(`${SUPA_URL}/rest/v1/cal_data`,{
-        method:'POST',headers:{...SUPA_HDR,'Prefer':'return=minimal'},
-        body:JSON.stringify({id:'main',stores:STORES,schedule:{},hours:{},updated_at:new Date().toISOString()}),
-      });
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/cal_data`,{method:'POST',headers:{...SUPA_HDR,'Prefer':'return=minimal'},
+        body:JSON.stringify({id:'main',stores:STORES,schedule:{},hours:{},updated_at:new Date().toISOString()})});
     }
   }catch(e){
     console.warn('Cloud load failed, fallback:',e);
     try{
-      const rs=localStorage.getItem('cal5_stores');
-      if(rs){const p=JSON.parse(rs);STORES.length=0;p.forEach(s=>STORES.push(s));}
-      const rv=localStorage.getItem('cal5_state');
-      if(rv){const sv=JSON.parse(rv);S.schedule=sv.schedule||{};S.hours=sv.hours||{};}
+      const rs=localStorage.getItem('cal5_stores');if(rs){const p=JSON.parse(rs);STORES.length=0;p.forEach(s=>STORES.push(s));}
+      const rv=localStorage.getItem('cal5_state');if(rv){const sv=JSON.parse(rv);S.schedule=sv.schedule||{};S.hours=sv.hours||{};}
     }catch(e2){}
   }
   DEFAULT_STORES.forEach((ds,i)=>{
-    if(!STORES[i]) STORES.push({name:ds.name,staff:[...ds.staff],monthlyStaff:{}});
-    else{ STORES[i].staff=[...ds.staff]; if(!STORES[i].monthlyStaff) STORES[i].monthlyStaff={}; }
+    if(!STORES[i])STORES.push({name:ds.name,staff:[...ds.staff],monthlyStaff:{},staffDefaultHours:{}});
+    else{
+      STORES[i].staff=[...ds.staff];
+      if(!STORES[i].monthlyStaff)STORES[i].monthlyStaff={};
+      if(!STORES[i].staffDefaultHours)STORES[i].staffDefaultHours={};
+    }
   });
 }
 
@@ -239,10 +294,34 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function nthWeekday(y,m,d){const w=dowOf(y,m,d);let n=0;for(let dd=1;dd<=d;dd++)if(dowOf(y,m,dd)===w)n++;return n;}
 function isPT(name){return name.includes('PT');}
 
-// ── 기본 근무 상태 ────────────────────────────────────────────────
+// ── 시간 유틸 ─────────────────────────────────────────────────────
+function parseTime(t){
+  if(!t||typeof t!=='string')return null;
+  const m=t.match(/^(\d{1,2}):(\d{2})$/);if(!m)return null;
+  const h=parseInt(m[1]),mi=parseInt(m[2]);
+  if(h<0||h>23||mi<0||mi>59)return null;
+  return h*60+mi;
+}
+function rangeDuration(s,e){
+  const sm=parseTime(s),em=parseTime(e);if(sm===null||em===null)return 0;
+  return(em>=sm?em-sm:em+1440-sm)/60;
+}
+function fmtBadge(s,e){
+  if(!s||!e)return'';
+  const sh=s.replace(':00','');const eh=e.replace(':00','');
+  return sh+'~'+eh;
+}
+function fmtFull(s,e){return`${s||'00:00'}~${e||'00:00'}`;}
+function padTime(t){
+  if(!t||!t.includes(':'))return t||'';
+  const[h,mi]=t.split(':');
+  return`${String(parseInt(h)||0).padStart(2,'0')}:${String(parseInt(mi)||0).padStart(2,'0')}`;
+}
+
+// ── 기본 근무 상태 ─────────────────────────────────────────────────
 function defaultStatus(st,y,m,d){
   const w=dowOf(y,m,d);
-  if(st===0) return w===2?'off':'work';
+  if(st===0)return w===2?'off':'work';
   if(st===1){if(w===1)return'off';if(w===2){const n=nthWeekday(y,m,d);return(n===2||n===4)?'off':'work';}return'work';}
   return'work';
 }
@@ -250,8 +329,7 @@ function defaultStatus(st,y,m,d){
 // ── 월별 직원 ─────────────────────────────────────────────────────
 function getMonthStaff(st,y,m){
   const key=`${y}-${m}`;const ms=STORES[st].monthlyStaff;
-  if(ms&&ms[key])return ms[key];
-  return[...STORES[st].staff];
+  if(ms&&ms[key])return ms[key];return[...STORES[st].staff];
 }
 function ensureMonthStaff(st,y,m){
   if(!STORES[st].monthlyStaff)STORES[st].monthlyStaff={};
@@ -269,35 +347,94 @@ function setCell(st,y,m,name,d,val){
 }
 
 // ── 근무시간 접근 ──────────────────────────────────────────────────
-function getHours(st,y,m,name,d){return S.hours?.[st]?.[y]?.[m]?.[name]?.[d];}
-function setHours(st,y,m,name,d,val){
+// hours[st][y][m][name][d] = {s:"HH:MM", e:"HH:MM"}  (날짜 오버라이드)
+// STORES[st].staffDefaultHours[name] = {s, e}          (직원 기본값)
+function getDefaultHours(st,name){return(STORES[st]?.staffDefaultHours||{})[name]||null;}
+function getHoursOverride(st,y,m,name,d){return S.hours?.[st]?.[y]?.[m]?.[name]?.[d]||null;}
+function getEffectiveHours(st,y,m,name,d){
+  const ov=getHoursOverride(st,y,m,name,d);if(ov)return{...ov,isOverride:true};
+  const def=getDefaultHours(st,name);if(def)return{...def,isOverride:false};
+  return null;
+}
+function setHoursOverride(st,y,m,name,d,val){
   if(!S.hours[st])S.hours[st]={};if(!S.hours[st][y])S.hours[st][y]={};
   if(!S.hours[st][y][m])S.hours[st][y][m]={};if(!S.hours[st][y][m][name])S.hours[st][y][m][name]={};
   S.hours[st][y][m][name][d]=val;
 }
-function deleteHours(st,y,m,name,d){if(S.hours?.[st]?.[y]?.[m]?.[name])delete S.hours[st][y][m][name][d];}
-function totalHours(st,y,m,name){
-  let total=0;const days=daysInMonth(y,m);
-  for(let d=1;d<=days;d++){const h=getHours(st,y,m,name,d);if(h)total+=h;}
+function deleteHoursOverride(st,y,m,name,d){if(S.hours?.[st]?.[y]?.[m]?.[name])delete S.hours[st][y][m][name][d];}
+function totalHoursCalc(st,y,m,name){
+  let total=0;
+  for(let d=1;d<=daysInMonth(y,m);d++){
+    if(getCell(st,y,m,name,d)!=='work')continue;
+    const eff=getEffectiveHours(st,y,m,name,d);
+    if(eff)total+=rangeDuration(eff.s,eff.e);
+  }
   return total;
 }
 function countWork(st,y,m,name){
   const days=daysInMonth(y,m);let w=0,o=0;
-  for(let d=1;d<=days;d++)getCell(st,y,m,name,d)==='work'?w++:o++;
-  return{w,o};
+  for(let d=1;d<=days;d++)getCell(st,y,m,name,d)==='work'?w++:o++;return{w,o};
+}
+
+// ── 기본 근무시간 모달 ────────────────────────────────────────────
+function openDhModal(){
+  if(!IS_ADMIN)return;
+  const{store:st,year:y,month:m}=S;
+  const ptStaff=getMonthStaff(st,y,m).filter(isPT);
+  const list=document.getElementById('dh-staff-list');
+  list.innerHTML='';
+  if(!ptStaff.length){list.innerHTML='<div style="color:var(--text3);font-size:12px;padding:4px 0;">이번 달 PT직원이 없습니다.</div>';
+  }else{
+    ptStaff.forEach(name=>{
+      const def=getDefaultHours(st,name)||{s:'',e:''};
+      const row=document.createElement('div');row.className='dh-row';
+      row.innerHTML=`<span class="dh-name">${esc(name)}</span>
+        <div class="dh-time-wrap">
+          <input class="dh-time-inp" id="dhs-${esc(name)}" type="text" maxlength="5" placeholder="00:00" value="${esc(def.s||'')}">
+          <span class="dh-sep">~</span>
+          <input class="dh-time-inp" id="dhe-${esc(name)}" type="text" maxlength="5" placeholder="00:00" value="${esc(def.e||'')}">
+          <button class="dh-clear" onclick="clearDhRow('${esc(name)}')">초기화</button>
+        </div>`;
+      list.appendChild(row);
+    });
+  }
+  document.getElementById('dh-modal').classList.add('open');
+}
+function clearDhRow(name){
+  const s=document.getElementById('dhs-'+name);const e=document.getElementById('dhe-'+name);
+  if(s)s.value='';if(e)e.value='';
+}
+function closeDhModal(){document.getElementById('dh-modal').classList.remove('open');}
+function saveDhModal(){
+  const{store:st,year:y,month:m}=S;
+  const ptStaff=getMonthStaff(st,y,m).filter(isPT);
+  if(!STORES[st].staffDefaultHours)STORES[st].staffDefaultHours={};
+  let err=false;
+  ptStaff.forEach(name=>{
+    if(err)return;
+    const sEl=document.getElementById('dhs-'+name);const eEl=document.getElementById('dhe-'+name);
+    if(!sEl||!eEl)return;
+    const sv=sEl.value.trim(),ev=eEl.value.trim();
+    if(!sv&&!ev){delete STORES[st].staffDefaultHours[name];return;}
+    const svP=padTime(sv),evP=padTime(ev);
+    if(parseTime(svP)===null){alert(`${name}: 시작 시간 형식이 잘못되었습니다.\n예) 18:00`);err=true;return;}
+    if(parseTime(evP)===null){alert(`${name}: 종료 시간 형식이 잘못되었습니다.\n예) 23:00`);err=true;return;}
+    STORES[st].staffDefaultHours[name]={s:svP,e:evP};
+  });
+  if(err)return;
+  save();closeDhModal();render();
 }
 
 // ── 셀 클릭 ──────────────────────────────────────────────────────
 let clickTimer=null;
 function handleCellClick(name,d,ptStaff){
   if(!IS_ADMIN)return;
-  if(!ptStaff){toggle(name,d);return;} // 비PT: 즉시 토글
-  // PT: 단/더블 구분
+  if(!ptStaff){toggle(name,d);return;}
   if(clickTimer){
     clearTimeout(clickTimer);clickTimer=null;
     const{store:st,year:y,month:m}=S;
-    if(getCell(st,y,m,name,d)!=='work')return;
-    editHours(name,d);
+    if(getCell(st,y,m,name,d)!=='work'){toggle(name,d);return;}
+    editHoursOverride(name,d);
   }else{
     clickTimer=setTimeout(()=>{clickTimer=null;toggle(name,d);},220);
   }
@@ -306,17 +443,28 @@ function toggle(name,d){
   const{store:st,year:y,month:m}=S;
   const next=getCell(st,y,m,name,d)==='work'?'off':'work';
   setCell(st,y,m,name,d,next);
-  if(next==='off')deleteHours(st,y,m,name,d);
+  if(next==='off')deleteHoursOverride(st,y,m,name,d);
   save();render();
 }
-function editHours(name,d){
+function editHoursOverride(name,d){
   const{store:st,year:y,month:m}=S;
-  const cur=getHours(st,y,m,name,d);
-  const input=prompt(`${name} · ${m}/${d}\n근무시간 입력 (예: 4, 6.5 / 빈 값 = 삭제)`,cur!==undefined?String(cur):'');
-  if(input===null)return;
-  const t=input.trim();
-  if(t===''){deleteHours(st,y,m,name,d);}
-  else{const h=parseFloat(t);if(isNaN(h)||h<0||h>24){alert('0~24 사이 숫자를 입력해주세요.');return;}setHours(st,y,m,name,d,h);}
+  const def=getDefaultHours(st,name);
+  const ov=getHoursOverride(st,y,m,name,d);
+  const defTxt=def?`기본: ${fmtFull(def.s,def.e)}`:'기본값 없음 (⚙ 버튼으로 설정)';
+  const curS=ov?ov.s:(def?def.s:'');
+  const curE=ov?ov.e:(def?def.e:'');
+
+  const inputS=prompt(`${name}  ${m}/${d} — 시작 시간\n(${defTxt})\n\n빈 값으로 저장 → 기본값으로 초기화`,curS);
+  if(inputS===null)return;
+  if(inputS.trim()===''){deleteHoursOverride(st,y,m,name,d);save();render();return;}
+
+  const inputE=prompt(`${name}  ${m}/${d} — 종료 시간\n(${defTxt})`,curE);
+  if(inputE===null)return;
+
+  const sv=padTime(inputS.trim()),ev=padTime(inputE.trim());
+  if(parseTime(sv)===null){alert('시작 시간 형식이 잘못되었습니다.\n예) 18:00');return;}
+  if(parseTime(ev)===null){alert('종료 시간 형식이 잘못되었습니다.\n예) 23:00');return;}
+  setHoursOverride(st,y,m,name,d,{s:sv,e:ev});
   save();render();
 }
 
@@ -334,19 +482,15 @@ function deleteStaff(si){
   if(!IS_ADMIN)return;
   const{store:st,year:y,month:m}=S;
   const staff=ensureMonthStaff(st,y,m);
-  const name=staff[si];
-  if(!confirm(`"${name}" 직원을 이번 달 목록에서 삭제할까요?`))return;
+  const name=staff[si];if(!confirm(`"${name}" 직원을 이번 달 목록에서 삭제할까요?`))return;
   staff.splice(si,1);save();render();
 }
 function startEditName(si){
   if(!IS_ADMIN)return;
   const{store:st,year:y,month:m}=S;
-  const staff=ensureMonthStaff(st,y,m);
-  const oldName=staff[si];
-  const cell=document.getElementById(`name-cell-${si}`);
-  const inner=cell.querySelector('.name-inner');
-  const inp=document.createElement('input');
-  inp.className='name-edit-inp';inp.value=oldName;inp.maxLength=12;
+  const staff=ensureMonthStaff(st,y,m);const oldName=staff[si];
+  const cell=document.getElementById(`name-cell-${si}`);const inner=cell.querySelector('.name-inner');
+  const inp=document.createElement('input');inp.className='name-edit-inp';inp.value=oldName;inp.maxLength=12;
   inner.innerHTML='';
   const bar=document.createElement('div');bar.className='name-bar';bar.style.background=COLORS[si%COLORS.length];
   inner.appendChild(bar);inner.appendChild(inp);inp.focus();inp.select();
@@ -355,7 +499,11 @@ function startEditName(si){
     if(newName&&newName!==oldName){
       if(staff.includes(newName)){alert('같은 이름의 직원이 이미 있습니다.');inp.focus();return;}
       staff[si]=newName;
-      [S.schedule,S.hours].forEach(obj=>{const d=obj[st];if(d)Object.values(d).forEach(yr=>Object.values(yr).forEach(mo=>{if(mo[oldName]){mo[newName]=mo[oldName];delete mo[oldName];}}));});
+      [S.schedule,S.hours].forEach(obj=>{const dd=obj[st];if(dd)Object.values(dd).forEach(yr=>Object.values(yr).forEach(mo=>{if(mo[oldName]){mo[newName]=mo[oldName];delete mo[oldName];}}));});
+      if(STORES[st].staffDefaultHours&&STORES[st].staffDefaultHours[oldName]){
+        STORES[st].staffDefaultHours[newName]=STORES[st].staffDefaultHours[oldName];
+        delete STORES[st].staffDefaultHours[oldName];
+      }
       save();
     }
     render();
@@ -365,39 +513,28 @@ function startEditName(si){
 }
 
 // ── 월 이동 ──────────────────────────────────────────────────────
-function changeMonth(d){
-  S.month+=d;
-  if(S.month>12){S.month=1;S.year++;}
-  if(S.month<1) {S.month=12;S.year--;}
+function changeMonth(delta){
+  S.month+=delta;if(S.month>12){S.month=1;S.year++;}if(S.month<1){S.month=12;S.year--;}
   save();render();
 }
 
-// ── 7월 일정 초기화 (자동 적용) ──────────────────────────────────
+// ── 7월 초기 데이터 ───────────────────────────────────────────────
 function seedJuly2026(){
-  // 이미 데이터가 있으면 스킵
   if(S.schedule?.[0]?.[2026]?.[7]||S.schedule?.[1]?.[2026]?.[7])return;
-
   if(!STORES[0].monthlyStaff)STORES[0].monthlyStaff={};
   if(!STORES[1].monthlyStaff)STORES[1].monthlyStaff={};
-
-  // 7월 월별 직원 목록
-  STORES[0].monthlyStaff['2026-7']=['김근호','박경규','안준식','양서준','최예찬','장소영PT','하우승PT','이시헌PT'];
+  STORES[0].monthlyStaff['2026-7']=['박경규','안준식','양서준','최예찬','장소영PT','하우승PT','이시헌PT'];
   STORES[1].monthlyStaff['2026-7']=['김근호','안봉호','송정수','주창은','윤건PT','김하늘PT','박주현PT','장성익PT'];
-
   if(!S.schedule[0])S.schedule[0]={};if(!S.schedule[0][2026])S.schedule[0][2026]={};
   if(!S.schedule[1])S.schedule[1]={};if(!S.schedule[1][2026])S.schedule[1][2026]={};
-
   function fill(st,data){
     S.schedule[st][2026][7]={};
     Object.keys(data).forEach(name=>{
       S.schedule[st][2026][7][name]={};
-      for(let d=1;d<=31;d++) S.schedule[st][2026][7][name][d]=data[name].has(d)?'work':'off';
+      for(let d=1;d<=31;d++)S.schedule[st][2026][7][name][d]=data[name].has(d)?'work':'off';
     });
   }
-
-  // ── 심야식당기억 7월 ──
   fill(0,{
-    '김근호':   new Set([]),
     '박경규':   new Set([1,2,3,4,6,8,9,10,13,15,16,17,20,22,23,24,27,29,30,31]),
     '안준식':   new Set([1,2,3,4,6,8,9,10,13,15,16,17,20,22,23,24,27,29,30,31]),
     '양서준':   new Set([1,2,3,4,8,9,10,11,15,16,17,18,22,23,24,25,29,30,31]),
@@ -406,8 +543,6 @@ function seedJuly2026(){
     '하우승PT': new Set([3,4,9,10,15,22,24]),
     '이시헌PT': new Set([2,3,6,8,9,10,13,15,16,20,22,23,24,27,29,30,31]),
   });
-
-  // ── 남산기억 7월 ──
   fill(1,{
     '김근호':   new Set([1,2,3,4,5,8]),
     '안봉호':   new Set([9,10,11,15,16,17,18,22,23,24,25,29,30,31]),
@@ -418,37 +553,42 @@ function seedJuly2026(){
     '박주현PT': new Set([2,3,4,9,10,11,15,17,24,25,30]),
     '장성익PT': new Set([4,5,9,10,17,18,25,26]),
   });
-
-  S.year=2026;S.month=7;
-  save();
+  S.year=2026;S.month=7;save();
 }
 
 // ── 로그인 ───────────────────────────────────────────────────────
+function selectRole(role){
+  ROLE_SEL=role;
+  document.getElementById('role-select').style.display='none';
+  document.getElementById('pw-step').classList.add('active');
+  document.getElementById('selected-role-label').textContent=role==='admin'?'👑 관리자로 로그인':'👁 일반으로 로그인';
+  document.getElementById('pw-input').value='';document.getElementById('login-err').textContent='';
+  setTimeout(()=>document.getElementById('pw-input').focus(),50);
+}
+function backToRole(){
+  ROLE_SEL=null;
+  document.getElementById('role-select').style.display='flex';
+  document.getElementById('pw-step').classList.remove('active');
+  document.getElementById('pw-input').value='';document.getElementById('login-err').textContent='';
+}
 async function submitLogin(){
   const pw=document.getElementById('pw-input').value;
-  if(pw===ADMIN_PW)IS_ADMIN=true;
-  else if(pw===VIEW_PW)IS_ADMIN=false;
-  else{
-    const err=document.getElementById('login-err');
-    err.textContent='비밀번호가 틀렸습니다.';
-    document.getElementById('pw-input').value='';
-    setTimeout(()=>{err.textContent='';},2500);return;
+  if(pw!==(ROLE_SEL==='admin'?ADMIN_PW:VIEW_PW)){
+    const err=document.getElementById('login-err');err.textContent='비밀번호가 틀렸습니다.';
+    document.getElementById('pw-input').value='';setTimeout(()=>{err.textContent='';},2500);return;
   }
-  document.getElementById('login-overlay').style.display='none';
-  document.getElementById('pw-input').value='';
+  IS_ADMIN=ROLE_SEL==='admin';
+  document.getElementById('login-overlay').style.display='none';document.getElementById('pw-input').value='';
   await initApp();
 }
-function doLogout(){
-  document.getElementById('login-overlay').style.display='flex';
-  document.getElementById('pw-input').value='';
-}
+function doLogout(){backToRole();document.getElementById('login-overlay').style.display='flex';}
 
-// ── 탭 ───────────────────────────────────────────────────────────
+// ── 매장 탭 ──────────────────────────────────────────────────────
 function buildStoreTabs(){
   const el=document.getElementById('store-tabbar');
   el.innerHTML=STORES.map((s,i)=>{
-    const theme=STORE_THEMES[i];const isActive=S.store===i;
-    const style=isActive?`color:${theme.light};border-bottom-color:${theme.base};background:${theme.bg};`:'';
+    const t=STORE_THEMES[i];const isActive=S.store===i;
+    const style=isActive?`color:${t.base};border-bottom-color:${t.base};background:${t.bg};`:'';
     return`<div class="stab${isActive?' active':''}" style="${style}" onclick="switchStore(${i})">${esc(s.name)}</div>`;
   }).join('');
   const t=STORE_THEMES[S.store];
@@ -462,59 +602,52 @@ function switchStore(i){S.store=i;save();render();}
 function render(){
   const{year:y,month:m,store:st}=S;
   document.getElementById('month-label').textContent=`${y}년 ${m}월`;
-
-  // role badge
   const badge=document.getElementById('role-badge');
   if(IS_ADMIN){badge.className='badge-admin';badge.textContent='👑 관리자';}
   else{badge.className='badge-view';badge.textContent='👁 일반';}
-
   document.body.classList.toggle('view-only',!IS_ADMIN);
   buildStoreTabs();
 
   const staff=getMonthStaff(st,y,m);
   const days=daysInMonth(y,m);
-  const table=document.getElementById('cal');
-  table.innerHTML='';
+  const table=document.getElementById('cal');table.innerHTML='';
 
   // ── 요일 헤더 ──
   const trDow=document.createElement('tr');
-  let th=document.createElement('th');
-  th.className='col-name';th.rowSpan=2;th.textContent='이름';
-  trDow.appendChild(th);
+  let th=document.createElement('th');th.className='col-name';th.rowSpan=2;th.textContent='이름';trDow.appendChild(th);
   for(let d=1;d<=days;d++){
     const w=dowOf(y,m,d);th=document.createElement('th');
-    th.className=`col-day dow ${w===0?'sun':w===6?'sat':''}`;
-    th.textContent=DOW[w];trDow.appendChild(th);
+    th.className=`col-day dow${w===0?' sun':w===6?' sat':''}`;th.textContent=DOW[w];
+    if(w===6)th.classList.add('week-sep');
+    trDow.appendChild(th);
   }
   th=document.createElement('th');th.className='col-cnt';th.rowSpan=2;th.textContent='근무/휴무';trDow.appendChild(th);
-  th=document.createElement('th');th.className='col-hrs';th.rowSpan=2;
-  th.innerHTML='근무시간<br><span style="font-size:9px;color:#4b4980;font-weight:400">PT직원 더블클릭</span>';
-  trDow.appendChild(th);
-  table.appendChild(trDow);
+  const thHrs=document.createElement('th');thHrs.className='col-hrs';thHrs.rowSpan=2;
+  thHrs.innerHTML='근무시간'+(IS_ADMIN?`<br><button class="set-dh-btn" onclick="openDhModal()">⚙ 기본시간 설정</button>`:'');
+  trDow.appendChild(thHrs);table.appendChild(trDow);
 
   // ── 날짜 헤더 ──
   const trDate=document.createElement('tr');
   for(let d=1;d<=days;d++){
     const w=dowOf(y,m,d);th=document.createElement('th');
-    th.className=`col-day date-num ${w===0?'sun':w===6?'sat':''}`;
-    th.textContent=d;trDate.appendChild(th);
+    th.className=`col-day date-num${w===0?' sun':w===6?' sat':''}`;th.textContent=d;
+    if(w===6)th.classList.add('week-sep');
+    trDate.appendChild(th);
   }
   table.appendChild(trDate);
 
   // ── 직원 행 ──
   staff.forEach((name,si)=>{
-    const color=COLORS[si%COLORS.length];
-    const pt=isPT(name);
+    const color=COLORS[si%COLORS.length];const pt=isPT(name);
     const tr=document.createElement('tr');
 
     // 이름 셀
-    const tdName=document.createElement('td');
-    tdName.className='name-cell';tdName.id=`name-cell-${si}`;
+    const tdName=document.createElement('td');tdName.className='name-cell';tdName.id=`name-cell-${si}`;
     if(IS_ADMIN){
       tdName.innerHTML=`<div class="name-inner">
         <div class="name-bar" style="background:${color}"></div>
-        <span class="name-text" title="클릭하여 이름 수정" onclick="startEditName(${si})">${esc(name)}</span>
-        <button class="del-btn" title="직원 삭제" onclick="deleteStaff(${si})">✕</button>
+        <span class="name-text" onclick="startEditName(${si})">${esc(name)}</span>
+        <button class="del-btn" onclick="deleteStaff(${si})">✕</button>
       </div>`;
     }else{
       tdName.innerHTML=`<div class="name-inner">
@@ -527,22 +660,35 @@ function render(){
     // 날짜 셀
     for(let d=1;d<=days;d++){
       const w=dowOf(y,m,d);
-      const status=getCell(st,y,m,name,d);
-      const hrs=pt?getHours(st,y,m,name,d):undefined;
-      const isWork=status==='work';
-      const hasHrs=hrs!==undefined;
+      const status=getCell(st,y,m,name,d);const isWork=status==='work';
       const td=document.createElement('td');
-      let cls=`day-cell ${status}`;
+      let cls='day-cell '+status;
       if(w===0)cls+=' sun-col';if(w===6)cls+=' sat-col';
       td.className=cls;
+      if(w===6)td.classList.add('week-sep');
+
       if(isWork){
-        if(hasHrs){
-          td.style.background=color+'66';
-          const b=document.createElement('span');b.className='hrs-badge';b.textContent=`${hrs}h`;td.appendChild(b);
-        }else{td.style.background=color;}
+        if(pt){
+          const eff=getEffectiveHours(st,y,m,name,d);
+          if(eff){
+            td.style.background=eff.isOverride?color+'66':color;
+            const b=document.createElement('span');b.className='cell-badge';
+            b.textContent=fmtBadge(eff.s,eff.e);td.appendChild(b);
+          }else{
+            td.style.background=color;
+          }
+        }else{
+          td.style.background=color;
+        }
       }
-      td.title=`${name} ${m}/${d}(${DOW[w]}) · ${isWork?'근무':'휴무'}${hasHrs?' · '+hrs+'시간':''}`;
-      if(IS_ADMIN) td.onclick=((_n,_d,_p)=>()=>handleCellClick(_n,_d,_p))(name,d,pt);
+
+      if(IS_ADMIN)td.onclick=((_n,_d,_p)=>()=>handleCellClick(_n,_d,_p))(name,d,pt);
+
+      // 툴팁
+      const eff2=pt?getEffectiveHours(st,y,m,name,d):null;
+      td.title=`${name} ${m}/${d}(${DOW[w]}) · ${isWork?'근무':'휴무'}`+
+        (eff2?` · ${fmtFull(eff2.s,eff2.e)}${eff2.isOverride?' ✏변경됨':' (기본)'}`:
+         (pt&&isWork?' · ⏱기본값 미설정':''));
       tr.appendChild(td);
     }
 
@@ -552,14 +698,18 @@ function render(){
     tdCnt.innerHTML=`<span class="w">근무 ${wc}</span><br><span class="o">휴무 ${oc}</span>`;
     tr.appendChild(tdCnt);
 
-    // 근무시간 합계 (PT만)
+    // 근무시간 (PT만)
     const tdHrs=document.createElement('td');tdHrs.className='hrs-cell';
     if(pt){
-      const total=totalHours(st,y,m,name);
-      if(total>0){tdHrs.innerHTML=`<span class="hv">${total%1===0?total:total.toFixed(1)}h</span>`;}
-      else{tdHrs.innerHTML=`<span class="hm">—</span>`;}
+      const def=getDefaultHours(st,name);
+      const total=totalHoursCalc(st,y,m,name);
+      let html='';
+      if(def){html+=`<span class="hdef">${fmtFull(def.s,def.e)}</span>`;}
+      else{html+=`<span class="hno">기본값 미설정</span>`;}
+      if(total>0)html+=`<span class="hv">${total%1===0?total:total.toFixed(1)}h</span>`;
+      tdHrs.innerHTML=html;
     }else{
-      tdHrs.innerHTML=`<span class="hm">—</span>`;
+      tdHrs.innerHTML='<span style="color:var(--text3);font-size:10px;">—</span>';
     }
     tr.appendChild(tdHrs);
     table.appendChild(tr);
@@ -570,10 +720,9 @@ function render(){
     const trAdd=document.createElement('tr');trAdd.className='add-row';
     const tdAdd=document.createElement('td');tdAdd.colSpan=days+3;
     tdAdd.innerHTML=`<div class="add-row-inner">
-      <input class="add-name-inp" id="add-name-inp" placeholder="직원 이름 입력" maxlength="12"
-        onkeydown="if(event.key==='Enter')addStaff()">
+      <input class="add-name-inp" id="add-name-inp" placeholder="직원 이름 입력" maxlength="12" onkeydown="if(event.key==='Enter')addStaff()">
       <button class="add-name-btn" onclick="addStaff()">+ 직원 추가</button>
-      <span class="add-hint">이번 달만 적용 · 이름 클릭 수정 · ✕ 삭제 · PT직원은 더블클릭으로 근무시간 입력</span>
+      <span class="add-hint">이번 달만 적용 · PT: 클릭=근무토글, 더블클릭=시간변경 · ⚙버튼으로 기본시간 설정</span>
     </div>`;
     trAdd.appendChild(tdAdd);table.appendChild(trAdd);
   }
@@ -582,10 +731,8 @@ function render(){
 // ── 초기화 ───────────────────────────────────────────────────────
 async function initApp(){
   showLoading('데이터 불러오는 중...');
-  await load();
-  seedJuly2026(); // 7월 데이터 없으면 자동 적용
-  hideLoading();
-  render();
+  await load();seedJuly2026();
+  hideLoading();render();
 }
 </script>
 </body>
