@@ -41,7 +41,6 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .pwa-guide-step-text{font-size:14px;color:var(--text);line-height:1.5;}
 .pwa-guide-step-text b{font-weight:800;}
 .pwa-guide-step-sub{font-size:11px;color:var(--text3);margin-top:2px;}
-.pwa-guide-share-btn{width:100%;padding:15px;border-radius:12px;border:none;background:#0F7711;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px;}
 .pwa-guide-close{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:none;color:var(--text3);font-size:14px;cursor:pointer;font-family:inherit;}
 
 /* ── 로딩 ── */
@@ -103,7 +102,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .dh-save{padding:8px 20px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
 
 /* ── 헤더 ── */
-.hdr{background:var(--bg2);border-bottom:1px solid #fff;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.hdr{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
 .hdr-title{font-size:16px;font-weight:800;color:var(--text);white-space:nowrap;}
 .month-nav-bar{display:flex;justify-content:center;align-items:center;padding:12px 0;flex-shrink:0;}
 .month-nav{display:flex;align-items:center;gap:16px;}
@@ -138,9 +137,9 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .time-edit-cancel{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:inherit;}
 .time-edit-save{background:var(--theme);border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-.badge-admin{padding:4px 10px;border-radius:6px;background:#ffd600;color:#1a237e;font-size:11px;font-weight:800;}
-.badge-view{padding:4px 10px;border-radius:6px;background:#e8e8f4;color:var(--text2);font-size:11px;font-weight:700;}
-.logout-btn{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;}
+.badge-admin{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:6px;background:#ffd600;color:#1a237e;font-size:11px;font-weight:800;box-sizing:border-box;}
+.badge-view{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:6px;background:#e8e8f4;color:var(--text2);font-size:11px;font-weight:700;box-sizing:border-box;}
+.logout-btn{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;box-sizing:border-box;}
 .logout-btn:hover{border-color:#e03030;color:#e03030;}
 
 /* ── 매장 탭 ── */
@@ -151,17 +150,17 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .stab .view-tag{font-size:9px;font-weight:600;color:var(--text3);background:#eee;border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
 
 /* ── 캘린더 영역 ── */
-.cal-wrap{flex:1;min-height:0;overflow-x:auto;overflow-y:auto;padding:0 16px 58px 20px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
-table{border-collapse:collapse;min-width:100%;background:var(--bg2);border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+.cal-wrap{flex:1;min-height:0;overflow-x:auto;overflow-y:auto;padding:0 16px calc(58px + env(safe-area-inset-bottom)) 20px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+table{border-collapse:collapse;min-width:100%;background:var(--bg2);border-radius:10px;overflow:clip;box-shadow:0 1px 6px rgba(0,0,0,.06);}
 th,td{border:1px solid var(--border);text-align:center;vertical-align:middle;white-space:nowrap;}
 th.col-day.week-b{background:#fff;}
 td.day-cell.off.week-b{background:#fff;}
 td.day-cell.off.sun-col.week-b{background:#fff5f5;}
 td.day-cell.off.sat-col.week-b{background:#f5f5ff;}
 
-th.col-name{width:110px;min-width:110px;background:var(--bg3);font-size:13px;font-weight:700;padding:6px 8px;position:sticky;left:0;z-index:2;color:var(--text);}
-th.col-cnt{width:76px;min-width:76px;background:var(--bg3);font-size:11px;padding:4px 6px;position:sticky;right:110px;z-index:2;color:var(--text2);}
-th.col-hrs{width:110px;min-width:110px;background:var(--bg3);font-size:11px;padding:6px;position:sticky;right:0;z-index:2;color:var(--text2);line-height:1.5;}
+th.col-name{width:110px;min-width:110px;background:var(--bg3);font-size:13px;font-weight:700;padding:6px 8px;position:sticky;left:0;z-index:2;color:var(--text);box-shadow:2px 0 4px rgba(0,0,0,.07);}
+th.col-cnt{width:76px;min-width:76px;background:var(--bg3);font-size:11px;padding:4px 6px;color:var(--text2);}
+th.col-hrs{width:110px;min-width:110px;background:var(--bg3);font-size:11px;padding:6px;color:var(--text2);line-height:1.5;}
 .set-dh-btn{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:5px;border:1.5px solid var(--border);background:#fff;color:var(--theme);font-size:10px;font-weight:800;cursor:pointer;font-family:inherit;}
 .set-dh-btn:hover{background:var(--theme-bg);}
 th.col-day{min-width:30px;width:30px;font-size:12px;padding:4px 2px;background:var(--bg3);color:var(--text2);}
@@ -169,7 +168,7 @@ th.col-day.sun{color:#cc2222;background:#fff8f8;}
 th.col-day.sat{color:#2244bb;background:#f8f8ff;}
 th.dow{font-size:12px;}th.date-num{font-size:13px;font-weight:700;}
 
-td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:var(--bg3);position:sticky;left:0;z-index:1;min-width:110px;text-align:left;}
+td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:var(--bg3);position:sticky;left:0;z-index:1;min-width:110px;text-align:left;box-shadow:2px 0 4px rgba(0,0,0,.07);}
 .name-inner{display:flex;align-items:center;width:100%;}
 .name-bar{width:3px;flex-shrink:0;align-self:stretch;border-radius:1px;}
 .name-text{flex:1;padding:7px 8px;font-size:14px;font-weight:700;cursor:pointer;text-align:left;color:var(--text);}
@@ -180,10 +179,10 @@ td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:var(--b
 .del-btn{flex-shrink:0;width:18px;height:18px;border-radius:4px;border:none;background:#ffe8e8;color:#d05050;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;margin-left:3px;}
 td.name-cell:hover .del-btn{opacity:1;}
 
-td.cnt-cell{font-size:10px;padding:4px 6px;background:var(--bg3);position:sticky;right:110px;z-index:1;line-height:1.6;color:var(--text3);}
+td.cnt-cell{font-size:10px;padding:4px 6px;background:var(--bg3);line-height:1.6;color:var(--text3);}
 td.cnt-cell .w{color:#2a8a30;font-weight:700;}
 td.cnt-cell .o{color:#bb3355;font-weight:700;}
-td.hrs-cell{font-size:10px;padding:5px 8px;background:var(--bg3);position:sticky;right:0;z-index:1;color:var(--text3);min-width:110px;line-height:1.8;text-align:center;}
+td.hrs-cell{font-size:10px;padding:5px 8px;background:var(--bg3);color:var(--text3);min-width:110px;line-height:1.8;text-align:center;}
 td.hrs-cell .hv{display:block;color:#b07000;font-weight:800;font-size:13px;}
 td.hrs-cell .hdef{display:block;font-size:9px;color:var(--text3);}
 td.hrs-cell .hno{display:block;font-size:9px;color:#e08030;}
@@ -200,16 +199,16 @@ th.date-num,th.dow{cursor:pointer;}
 th.date-num:hover,th.dow:hover{background:rgba(0,0,0,.06) !important;}
 .col-highlight{filter:brightness(.80);}
 
-tr.add-row td{background:var(--bg);padding:6px 10px;}
-.add-row-inner{display:flex;align-items:center;gap:8px;}
-.add-name-inp{background:#fff;border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:4px 10px;outline:none;width:130px;font-family:inherit;}
+tr.add-row td{background:var(--bg);padding:12px 16px;}
+.add-row-inner{display:flex;align-items:center;gap:10px;}
+.add-name-inp{background:#fff;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:8px 12px;outline:none;width:150px;font-family:inherit;}
 .add-name-inp:focus{border-color:var(--theme);}
-.add-name-btn{padding:4px 12px;border-radius:6px;border:none;background:var(--theme);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.add-name-btn{padding:8px 16px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
 .add-name-btn:hover{opacity:.88;}
 .add-hint{font-size:10px;color:var(--text3);}
 
 /* ── 메시지 바텀시트 ── */
-.msg-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:14px 14px 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.08);transform:translateY(calc(100% - 48px));transition:transform .32s cubic-bezier(.4,0,.2,1);z-index:400;display:none;}
+.msg-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:14px 14px 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.08);transform:translateY(calc(100% - 48px));transition:transform .32s cubic-bezier(.4,0,.2,1);z-index:400;display:none;padding-bottom:env(safe-area-inset-bottom);}
 .msg-sheet.sheet-visible{display:block;}
 .msg-sheet.sheet-open{transform:translateY(0);}
 .msg-sheet-handle{display:flex;align-items:center;justify-content:center;height:48px;padding:0 20px;cursor:pointer;user-select:none;gap:8px;}
@@ -307,7 +306,6 @@ tr.add-row td{background:var(--bg);padding:6px 10px;}
   <div class="pwa-guide-box">
     <div class="pwa-guide-title">홈 화면에 추가하는 방법</div>
     <div class="pwa-guide-steps" id="pwa-guide-steps"></div>
-    <button class="pwa-guide-share-btn" id="pwa-guide-action-btn"></button>
     <button class="pwa-guide-close" onclick="closePwaGuide()">닫기</button>
   </div>
 </div>
@@ -1243,7 +1241,6 @@ function pwaInstall(){
 
 function openPwaGuide(){
   const stepsEl = document.getElementById('pwa-guide-steps');
-  const actionBtn = document.getElementById('pwa-guide-action-btn');
 
   if(_isIOS){
     stepsEl.innerHTML = `
@@ -1260,11 +1257,6 @@ function openPwaGuide(){
         <div class="pwa-guide-num">3</div>
         <div><div class="pwa-guide-step-text">오른쪽 상단 <b>'추가'</b> 버튼을 탭하면 완료!</div></div>
       </div>`;
-    actionBtn.textContent = '공유 메뉴 열기 □↑';
-    actionBtn.style.display = 'block';
-    actionBtn.onclick = ()=>{
-      navigator.share({title:'기억미감 근무 일정 관리', url:window.location.href}).catch(()=>{});
-    };
   } else if(_isAndroid){
     stepsEl.innerHTML = `
       <div class="pwa-guide-step">
@@ -1279,14 +1271,12 @@ function openPwaGuide(){
         <div class="pwa-guide-num">3</div>
         <div><div class="pwa-guide-step-text"><b>'설치'</b> 또는 <b>'추가'</b>를 탭하면 완료!</div></div>
       </div>`;
-    actionBtn.style.display = 'none';
   } else {
     stepsEl.innerHTML = `
       <div class="pwa-guide-step">
         <div class="pwa-guide-num">1</div>
         <div><div class="pwa-guide-step-text">브라우저 메뉴에서 <b>'홈 화면에 추가'</b> 또는 <b>'앱 설치'</b>를 선택하세요</div></div>
       </div>`;
-    actionBtn.style.display = 'none';
   }
 
   document.getElementById('pwa-guide-overlay').style.display = 'flex';
