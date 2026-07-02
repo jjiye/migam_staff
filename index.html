@@ -2,8 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>직원 근무 관리</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>기억미감 근무 일정 관리</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="기억미감">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F7711">
+<link rel="manifest" href='data:application/manifest+json,{"name":"%EA%B8%B0%EC%96%B5%EB%AF%B8%EA%B0%90+%EA%B7%BC%EB%AC%B4+%EC%9D%BC%EC%A0%95+%EA%B4%80%EB%A6%AC","short_name":"%EA%B8%B0%EC%96%B5%EB%AF%B8%EA%B0%90","start_url":"./","display":"standalone","background_color":"%23f4f5f9","theme_color":"%230F7711"}'>
 <style>
 :root{
   color-scheme:light;
@@ -14,6 +20,17 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ── PWA 인트로 ── */
+#pwa-intro{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(150deg,#0a5c0c 0%,#0F7711 50%,#1a9e1e 100%);padding:40px 32px;padding-bottom:max(40px,env(safe-area-inset-bottom));}
+.pwa-logo-wrap{width:88px;height:88px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;box-shadow:0 6px 28px rgba(0,0,0,.22);}
+.pwa-logo-text{font-size:30px;font-weight:900;color:#0F7711;letter-spacing:-1px;}
+.pwa-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px;}
+.pwa-sub{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:52px;}
+.pwa-install-btn{width:100%;max-width:300px;padding:17px 20px;border-radius:16px;border:none;background:#fff;color:#0F7711;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);font-family:inherit;margin-bottom:14px;transition:transform .1s,box-shadow .1s;}
+.pwa-install-btn:active{transform:scale(.97);box-shadow:0 2px 12px rgba(0,0,0,.14);}
+.pwa-install-hint{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:28px;text-align:center;line-height:1.6;}
+.pwa-skip{background:none;border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;padding:10px;font-family:inherit;text-decoration:underline;text-underline-offset:3px;}
 
 /* ── 로딩 ── */
 #loading-overlay{position:fixed;inset:0;background:rgba(240,241,249,.88);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:998;flex-direction:column;gap:14px;}
@@ -272,6 +289,25 @@ tr.add-row td{background:var(--bg);padding:6px 10px;}
 </style>
 </head>
 <body>
+
+<!-- PWA 인트로 -->
+<div id="pwa-intro" style="display:none;">
+  <div class="pwa-logo-wrap">
+    <span class="pwa-logo-text">기억</span>
+  </div>
+  <div class="pwa-title">기억미감</div>
+  <div class="pwa-sub">근무 일정 관리</div>
+  <button class="pwa-install-btn" onclick="pwaInstall()">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+      <polyline points="16 6 12 2 8 6"/>
+      <line x1="12" y1="2" x2="12" y2="15"/>
+    </svg>
+    홈 화면에 추가하기
+  </button>
+  <div class="pwa-install-hint">버튼을 탭하면 공유 메뉴가 열립니다<br>'홈 화면에 추가'를 선택해 설치하세요</div>
+  <button class="pwa-skip" onclick="skipPwaIntro()">지금은 브라우저에서 사용하기</button>
+</div>
 
 <!-- 로딩 -->
 <div id="loading-overlay">
@@ -1150,6 +1186,47 @@ async function initApp(){
   seedJuly2026();
   hideLoading();
   render();
+}
+
+// ── PWA 인트로 ──────────────────────────────────────────────────────
+(function(){
+  const isStandalone = window.navigator.standalone === true ||
+                       window.matchMedia('(display-mode: standalone)').matches;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(isMobile && !isStandalone){
+    document.getElementById('pwa-intro').style.display='flex';
+    document.getElementById('login-overlay').style.display='none';
+  }
+})();
+
+// Android Chrome: beforeinstallprompt 저장
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  window._pwaPrompt = e;
+});
+
+function pwaInstall(){
+  // Android Chrome: 네이티브 설치 프롬프트
+  if(window._pwaPrompt){
+    window._pwaPrompt.prompt();
+    window._pwaPrompt.userChoice.then(()=>{ window._pwaPrompt=null; });
+    return;
+  }
+  // iOS Safari: 공유 시트 열기 → 사용자가 '홈 화면에 추가' 선택
+  if(navigator.share){
+    navigator.share({
+      title: '기억미감 근무 일정 관리',
+      url: window.location.href
+    }).catch(()=>{});
+    return;
+  }
+  // Fallback (구형 브라우저)
+  alert('Safari 하단 공유 버튼(□↑)을 탭한 후\n"홈 화면에 추가"를 선택하세요.');
+}
+
+function skipPwaIntro(){
+  document.getElementById('pwa-intro').style.display='none';
+  document.getElementById('login-overlay').style.display='flex';
 }
 </script>
 </body>
