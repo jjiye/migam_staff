@@ -31,6 +31,18 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .pwa-install-btn:active{transform:scale(.97);box-shadow:0 2px 12px rgba(0,0,0,.14);}
 .pwa-install-hint{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:28px;text-align:center;line-height:1.6;}
 .pwa-skip{background:none;border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;padding:10px;font-family:inherit;text-decoration:underline;text-underline-offset:3px;}
+/* ── PWA 가이드 모달 ── */
+#pwa-guide-overlay{position:fixed;inset:0;z-index:1100;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);}
+.pwa-guide-box{background:#fff;border-radius:20px 20px 0 0;padding:28px 20px 36px;width:100%;max-width:412px;}
+.pwa-guide-title{font-size:16px;font-weight:900;color:var(--text);margin-bottom:20px;text-align:center;}
+.pwa-guide-steps{display:flex;flex-direction:column;gap:16px;margin-bottom:24px;}
+.pwa-guide-step{display:flex;align-items:flex-start;gap:14px;}
+.pwa-guide-num{width:28px;height:28px;border-radius:50%;background:#0F7711;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.pwa-guide-step-text{font-size:14px;color:var(--text);line-height:1.5;}
+.pwa-guide-step-text b{font-weight:800;}
+.pwa-guide-step-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.pwa-guide-share-btn{width:100%;padding:15px;border-radius:12px;border:none;background:#0F7711;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px;}
+.pwa-guide-close{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:none;color:var(--text3);font-size:14px;cursor:pointer;font-family:inherit;}
 
 /* ── 로딩 ── */
 #loading-overlay{position:fixed;inset:0;background:rgba(240,241,249,.88);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:998;flex-direction:column;gap:14px;}
@@ -290,6 +302,16 @@ tr.add-row td{background:var(--bg);padding:6px 10px;}
 </head>
 <body>
 
+<!-- PWA 설치 가이드 -->
+<div id="pwa-guide-overlay" style="display:none;" onclick="if(event.target===this)closePwaGuide()">
+  <div class="pwa-guide-box">
+    <div class="pwa-guide-title">홈 화면에 추가하는 방법</div>
+    <div class="pwa-guide-steps" id="pwa-guide-steps"></div>
+    <button class="pwa-guide-share-btn" id="pwa-guide-action-btn"></button>
+    <button class="pwa-guide-close" onclick="closePwaGuide()">닫기</button>
+  </div>
+</div>
+
 <!-- PWA 인트로 -->
 <div id="pwa-intro" style="display:none;">
   <div class="pwa-logo-wrap">
@@ -305,7 +327,7 @@ tr.add-row td{background:var(--bg);padding:6px 10px;}
     </svg>
     홈 화면에 추가하기
   </button>
-  <div class="pwa-install-hint">버튼을 탭하면 공유 메뉴가 열립니다<br>'홈 화면에 추가'를 선택해 설치하세요</div>
+  <div class="pwa-install-hint">iOS · Android 모두 설치 가능합니다</div>
   <button class="pwa-skip" onclick="skipPwaIntro()">지금은 브라우저에서 사용하기</button>
 </div>
 
@@ -1205,23 +1227,73 @@ window.addEventListener('beforeinstallprompt', e => {
   window._pwaPrompt = e;
 });
 
+const _isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const _isAndroid = /Android/i.test(navigator.userAgent);
+
 function pwaInstall(){
-  // Android Chrome: 네이티브 설치 프롬프트
+  // Android Chrome 네이티브 프롬프트
   if(window._pwaPrompt){
     window._pwaPrompt.prompt();
     window._pwaPrompt.userChoice.then(()=>{ window._pwaPrompt=null; });
     return;
   }
-  // iOS Safari: 공유 시트 열기 → 사용자가 '홈 화면에 추가' 선택
-  if(navigator.share){
-    navigator.share({
-      title: '기억미감 근무 일정 관리',
-      url: window.location.href
-    }).catch(()=>{});
-    return;
+  // 가이드 모달 표시
+  openPwaGuide();
+}
+
+function openPwaGuide(){
+  const stepsEl = document.getElementById('pwa-guide-steps');
+  const actionBtn = document.getElementById('pwa-guide-action-btn');
+
+  if(_isIOS){
+    stepsEl.innerHTML = `
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">1</div>
+        <div><div class="pwa-guide-step-text">Safari 화면 아래 <b>공유 버튼(□↑)</b>을 탭하세요</div>
+        <div class="pwa-guide-step-sub">화면 하단 가운데 위치합니다</div></div>
+      </div>
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">2</div>
+        <div><div class="pwa-guide-step-text">메뉴를 아래로 스크롤해서 <b>'홈 화면에 추가'</b>를 탭하세요</div></div>
+      </div>
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">3</div>
+        <div><div class="pwa-guide-step-text">오른쪽 상단 <b>'추가'</b> 버튼을 탭하면 완료!</div></div>
+      </div>`;
+    actionBtn.textContent = '공유 메뉴 열기 □↑';
+    actionBtn.style.display = 'block';
+    actionBtn.onclick = ()=>{
+      navigator.share({title:'기억미감 근무 일정 관리', url:window.location.href}).catch(()=>{});
+    };
+  } else if(_isAndroid){
+    stepsEl.innerHTML = `
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">1</div>
+        <div><div class="pwa-guide-step-text">Chrome 주소창 오른쪽 <b>메뉴(⋮)</b>를 탭하세요</div></div>
+      </div>
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">2</div>
+        <div><div class="pwa-guide-step-text"><b>'앱 설치'</b> 또는 <b>'홈 화면에 추가'</b>를 선택하세요</div></div>
+      </div>
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">3</div>
+        <div><div class="pwa-guide-step-text"><b>'설치'</b> 또는 <b>'추가'</b>를 탭하면 완료!</div></div>
+      </div>`;
+    actionBtn.style.display = 'none';
+  } else {
+    stepsEl.innerHTML = `
+      <div class="pwa-guide-step">
+        <div class="pwa-guide-num">1</div>
+        <div><div class="pwa-guide-step-text">브라우저 메뉴에서 <b>'홈 화면에 추가'</b> 또는 <b>'앱 설치'</b>를 선택하세요</div></div>
+      </div>`;
+    actionBtn.style.display = 'none';
   }
-  // Fallback (구형 브라우저)
-  alert('Safari 하단 공유 버튼(□↑)을 탭한 후\n"홈 화면에 추가"를 선택하세요.');
+
+  document.getElementById('pwa-guide-overlay').style.display = 'flex';
+}
+
+function closePwaGuide(){
+  document.getElementById('pwa-guide-overlay').style.display = 'none';
 }
 
 function skipPwaIntro(){
