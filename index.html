@@ -24,12 +24,12 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 
 /* ── PWA 인트로 ── */
 #pwa-intro{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(150deg,#0a5c0c 0%,#0F7711 50%,#1a9e1e 100%);padding:40px 20px;padding-bottom:max(40px,env(safe-area-inset-bottom));}
-.pwa-logo-wrap{width:88px;height:88px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;box-shadow:0 6px 28px rgba(0,0,0,.22);}
+.pwa-logo-wrap{width:88px;height:88px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;}
 .pwa-logo-text{font-size:30px;font-weight:900;color:#0F7711;letter-spacing:-1px;}
 .pwa-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px;}
 .pwa-sub{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:52px;}
-.pwa-install-btn{width:100%;max-width:300px;padding:17px 20px;border-radius:16px;border:none;background:#fff;color:#0F7711;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);font-family:inherit;margin-bottom:14px;transition:transform .1s,box-shadow .1s;}
-.pwa-install-btn:active{transform:scale(.97);box-shadow:0 2px 12px rgba(0,0,0,.14);}
+.pwa-install-btn{width:100%;max-width:300px;padding:17px 20px;border-radius:16px;border:none;background:#fff;color:#0F7711;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;margin-bottom:14px;transition:transform .1s;}
+.pwa-install-btn:active{transform:scale(.97);}
 .pwa-install-hint{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:28px;text-align:center;line-height:1.6;}
 .pwa-skip{background:none;border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;padding:10px;font-family:inherit;text-decoration:underline;text-underline-offset:3px;}
 /* ── PWA 가이드 모달 ── */
@@ -103,7 +103,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .dh-save{padding:8px 20px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
 
 /* ── 헤더 ── */
-.hdr{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.hdr{background:var(--bg);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
 .hdr-title{font-size:16px;font-weight:800;color:var(--text);white-space:nowrap;}
 .month-nav-bar{display:flex;justify-content:center;align-items:center;padding:12px 0;flex-shrink:0;}
 .month-nav{display:flex;align-items:center;gap:16px;}
@@ -144,23 +144,53 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .logout-btn:hover{border-color:#e03030;color:#e03030;}
 
 /* ── 매장 탭 ── */
-.store-tabbar{display:flex;flex-shrink:0;background:var(--bg);}
-.stab{flex:1;padding:10px 0;text-align:center;cursor:pointer;font-size:16px;font-weight:700;color:var(--text3);border-bottom:3px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;user-select:none;}
-.stab:hover{color:var(--text2);}
-.stab.active{color:var(--text);border-bottom-color:var(--theme);}
-.stab .view-tag{font-size:9px;font-weight:600;color:var(--text3);background:#eee;border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
+.store-tabbar{display:flex;flex-shrink:0;background:var(--bg);padding:8px 20px;}
+.tab-seg{display:flex;background:var(--border);border-radius:10px;padding:3px;gap:3px;flex:1;position:relative;overflow:hidden;}
+.tab-slider{position:absolute;top:3px;height:calc(100% - 6px);border-radius:8px;pointer-events:none;transition:none;z-index:0;}
+.stab{flex:1;padding:8px 0;text-align:center;cursor:pointer;font-size:14px;font-weight:700;color:var(--text2);border-radius:8px;transition:color .15s;white-space:nowrap;user-select:none;position:relative;z-index:1;}
+.stab:hover{background:rgba(0,0,0,.06);}
+.stab.active{color:#fff;}
+.stab .view-tag{font-size:9px;font-weight:600;color:#fff;background:var(--text2);border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
+.stab.active .view-tag{background:rgba(255,255,255,.2);}
+
+/* ── 팝업 / 전환 애니메이션 ── */
+@keyframes popupBgIn{from{opacity:0}to{opacity:1}}
+@keyframes popupBoxIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes popupSheetIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes appFadeOut{to{opacity:0}}
+/* .open class 팝업 */
+#dh-modal.open{animation:popupBgIn .18s ease;}
+#dh-modal.open .dh-box{animation:popupBoxIn .22s cubic-bezier(.4,0,.2,1);}
+.msg-popup-overlay.open{animation:popupBgIn .18s ease;}
+.msg-popup-overlay.open .msg-popup-box{animation:popupBoxIn .22s cubic-bezier(.4,0,.2,1);}
+.sp-overlay.open{animation:popupBgIn .18s ease;}
+.sp-overlay.open .sp-box{animation:popupBoxIn .22s cubic-bezier(.4,0,.2,1);}
+/* display:flex 팝업 — .pop-anim 클래스 추가 시 실행 */
+.pop-anim{animation:popupBgIn .18s ease;}
+.pop-anim .mpicker-box,.pop-anim .time-edit-box{animation:popupBoxIn .22s cubic-bezier(.4,0,.2,1);}
+.pop-anim .pwa-guide-box{animation:popupSheetIn .28s cubic-bezier(.4,0,.2,1);}
+/* 로그아웃 페이드아웃 */
+body.app-fade-out{animation:appFadeOut .22s ease forwards;}
+/* 로그인 화면 페이드인 */
+#login-overlay{animation:popupBgIn .35s ease;}
 
 /* ── 캘린더 영역 ── */
-.cal-wrap{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
-.cal-scroll{flex:1;min-height:0;overflow-x:auto;overflow-y:auto;padding:8px 8px calc(58px + env(safe-area-inset-bottom)) 8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
-table{border-collapse:collapse;min-width:100%;background:var(--bg2);border-radius:10px;overflow:clip;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+@keyframes calFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.cal-wrap{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.cal-wrap.cal-fade{animation:calFadeIn .25s ease;}
+.cal-wrap::before{content:'';position:absolute;left:0;top:0;bottom:0;width:20px;background:var(--bg);z-index:10;pointer-events:none;}
+/* 세로 스크롤 담당 — add-staff-bar는 이 안에서 가로 스크롤 영역 밖에 위치 */
+.cal-scroll-outer{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:flex;flex-direction:column;}
+/* 가로 스크롤만 담당 */
+.cal-scroll{overflow-x:auto;overflow-y:visible;padding:8px 8px 0 20px;}
+table{border-collapse:collapse;min-width:100%;background:var(--bg2);border-radius:0;overflow:clip;}
 th,td{border:1px solid var(--border);text-align:center;vertical-align:middle;white-space:nowrap;}
 th.col-day.week-b{background:#fff;}
 td.day-cell.off.week-b{background:#fff;}
 td.day-cell.off.sun-col.week-b{background:#fff5f5;}
 td.day-cell.off.sat-col.week-b{background:#f5f5ff;}
 
-th.col-name{width:110px;min-width:110px;background:var(--bg3);font-size:13px;font-weight:700;padding:6px 8px;position:sticky;left:0;z-index:2;color:var(--text);box-shadow:2px 0 4px rgba(0,0,0,.07);}
+th.col-name{width:110px;min-width:110px;background:var(--bg3);font-size:13px;font-weight:700;padding:6px 8px;position:sticky;left:0;z-index:2;color:var(--text);border:none;border-right:1.5px solid var(--border);}
 th.col-cnt{width:76px;min-width:76px;background:var(--bg3);font-size:11px;padding:4px 6px;color:var(--text2);}
 th.col-hrs{width:110px;min-width:110px;background:var(--bg3);font-size:11px;padding:6px;color:var(--text2);line-height:1.5;}
 .set-dh-btn{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:5px;border:1.5px solid var(--border);background:#fff;color:var(--theme);font-size:10px;font-weight:800;cursor:pointer;font-family:inherit;}
@@ -170,7 +200,7 @@ th.col-day.sun{color:#cc2222;background:#fff8f8;}
 th.col-day.sat{color:#2244bb;background:#f8f8ff;}
 th.dow{font-size:12px;}th.date-num{font-size:13px;font-weight:700;}
 
-td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:var(--bg3);position:sticky;left:0;z-index:1;min-width:110px;text-align:left;box-shadow:2px 0 4px rgba(0,0,0,.07);}
+td.name-cell{font-size:13px;font-weight:700;padding:0 4px 0 0;background:var(--bg3);position:sticky;left:0;z-index:1;min-width:110px;text-align:left;border:none;border-right:1.5px solid var(--border);}
 .name-inner{display:flex;align-items:center;width:100%;}
 .name-bar{width:3px;flex-shrink:0;align-self:stretch;border-radius:1px;}
 .name-text{flex:1;padding:7px 8px;font-size:14px;font-weight:700;cursor:pointer;text-align:left;color:var(--text);}
@@ -201,15 +231,16 @@ th.date-num,th.dow{cursor:pointer;}
 th.date-num:hover,th.dow:hover{background:rgba(0,0,0,.06) !important;}
 .col-highlight{filter:brightness(.80);}
 
-.add-staff-bar{display:none;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);margin:0 8px 8px;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.06);flex-shrink:0;}
-.add-name-inp{background:#f8f9fc;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;padding:8px 12px;outline:none;width:150px;font-family:inherit;}
+.add-staff-bar{display:none;flex-direction:column;gap:8px;padding:16px 16px calc(60px + env(safe-area-inset-bottom)) 20px;background:var(--bg);border-top:1px solid var(--border);flex-shrink:0;}
+.add-staff-row{display:flex;align-items:center;gap:10px;}
+.add-name-inp{background:#f8f9fc;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-weight:700;padding:7px 12px;outline:none;width:160px;font-family:inherit;}
 .add-name-inp:focus{border-color:var(--theme);}
-.add-name-btn{padding:8px 16px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.add-name-btn{padding:7px 16px;border-radius:8px;border:none;background:var(--theme);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .add-name-btn:hover{opacity:.88;}
-.add-hint{font-size:10px;color:var(--text3);}
+.add-hint{font-size:11px;color:var(--text3);line-height:1.5;}
 
 /* ── 메시지 바텀시트 ── */
-.msg-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:14px 14px 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.08);transform:translateY(calc(100% - 48px));transition:transform .32s cubic-bezier(.4,0,.2,1);z-index:400;display:none;padding-bottom:env(safe-area-inset-bottom);}
+.msg-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.08);transform:translateY(calc(100% - 48px - env(safe-area-inset-bottom)));transition:transform .32s cubic-bezier(.4,0,.2,1);z-index:400;display:none;padding-bottom:env(safe-area-inset-bottom);}
 .msg-sheet.sheet-visible{display:block;}
 .msg-sheet.sheet-open{transform:translateY(0);}
 .msg-sheet-handle{display:flex;align-items:center;justify-content:center;height:48px;padding:0 20px;cursor:pointer;user-select:none;gap:8px;}
@@ -474,11 +505,15 @@ th.date-num:hover,th.dow:hover{background:rgba(0,0,0,.06) !important;}
 
 <!-- 캘린더 -->
 <div class="cal-wrap">
-  <div class="cal-scroll"><table id="cal"></table></div>
-  <div id="add-staff-bar" class="add-staff-bar">
-    <input class="add-name-inp" id="add-name-inp" placeholder="직원 이름 입력" maxlength="12" onkeydown="if(event.key==='Enter')addStaff()">
-    <button class="add-name-btn" onclick="addStaff()">+ 직원 추가</button>
-    <span class="add-hint">이번 달만 적용 · PT: 클릭=근무토글, 꾹 누르면=시간변경 · ⚙버튼으로 기본시간 설정</span>
+  <div class="cal-scroll-outer">
+    <div class="cal-scroll"><table id="cal"></table></div>
+    <div id="add-staff-bar" class="add-staff-bar">
+      <div class="add-staff-row">
+        <input class="add-name-inp" id="add-name-inp" placeholder="직원 이름 입력" maxlength="12" onkeydown="if(event.key==='Enter')addStaff()">
+        <button class="add-name-btn" onclick="addStaff()">+ 직원 추가</button>
+      </div>
+      <span class="add-hint">이번 달만 적용 · PT: 클릭=근무토글, 꾹 누르면=시간변경 · ⚙버튼으로 기본시간 설정</span>
+    </div>
   </div>
 </div>
 
@@ -836,7 +871,9 @@ function editHoursOverride(name,d){
   const curS=ov?ov.s:(def?def.s:'');const curE=ov?ov.e:(def?def.e:'');
   document.getElementById('time-edit-s').value=curS;
   document.getElementById('time-edit-e').value=curE;
-  document.getElementById('time-edit-overlay').style.display='flex';
+  const tel=document.getElementById('time-edit-overlay');
+  tel.classList.remove('pop-anim');tel.style.display='flex';
+  void tel.offsetWidth;tel.classList.add('pop-anim');
 }
 function closeTimeEdit(){
   document.getElementById('time-edit-overlay').style.display='none';
@@ -900,7 +937,12 @@ function changeMonth(delta){
   SELECTED_DAY=null;save();render();
 }
 let PICKER_YEAR=null;
-function openMonthPicker(){PICKER_YEAR=S.year;renderMonthPicker();document.getElementById('mpicker-overlay').style.display='flex';}
+function openMonthPicker(){
+  PICKER_YEAR=S.year;renderMonthPicker();
+  const el=document.getElementById('mpicker-overlay');
+  el.classList.remove('pop-anim');el.style.display='flex';
+  void el.offsetWidth;el.classList.add('pop-anim');
+}
 function closeMonthPicker(){document.getElementById('mpicker-overlay').style.display='none';}
 function shiftPickerYear(d){PICKER_YEAR+=d;renderMonthPicker();}
 function renderMonthPicker(){
@@ -998,29 +1040,68 @@ async function submitLogin(){
   await initApp();
 }
 function doLogout(){
-  IS_ADMIN=false;CURRENT_ADMIN=null;ROLE_SEL=null;ADMIN_IDX_SEL=null;
-  document.getElementById('pw-input').value='';document.getElementById('login-err').textContent='';
-  gotoStep('role');
-  document.getElementById('login-overlay').style.display='flex';
-  const ms=document.getElementById('msg-section');ms.innerHTML='';
-  const sheet=document.getElementById('msg-sheet');sheet.classList.remove('sheet-visible','sheet-open');
+  document.body.classList.add('app-fade-out');
+  setTimeout(()=>{
+    document.body.classList.remove('app-fade-out');
+    IS_ADMIN=false;CURRENT_ADMIN=null;ROLE_SEL=null;ADMIN_IDX_SEL=null;
+    document.getElementById('pw-input').value='';document.getElementById('login-err').textContent='';
+    gotoStep('role');
+    document.getElementById('login-overlay').style.display='flex';
+    const ms=document.getElementById('msg-section');ms.innerHTML='';
+    const sheet=document.getElementById('msg-sheet');sheet.classList.remove('sheet-visible','sheet-open');
+  },220);
 }
 
 // ── 매장 탭 ──────────────────────────────────────────────────────
 function buildStoreTabs(){
   const el=document.getElementById('store-tabbar');
-  el.innerHTML=STORES.map((s,i)=>{
-    const t=STORE_THEMES[i];const isActive=S.store===i;
-    const style=isActive?`color:${t.base};border-bottom-color:${t.base};background:${t.bg};`:'';
+  // 슬라이더 현재 위치 기억 (애니메이션용)
+  const existingSeg=el.querySelector('.tab-seg');
+  const existingSlider=el.querySelector('.tab-slider');
+  let oldLeft=null;
+  if(existingSlider&&existingSeg){
+    const sr=existingSeg.getBoundingClientRect();
+    const slr=existingSlider.getBoundingClientRect();
+    oldLeft=slr.left-sr.left;
+  }
+  const tabs=STORES.map((s,i)=>{
+    const isActive=S.store===i;
     const viewTag=IS_ADMIN&&!canEditStore(i)?'<span class="view-tag">보기</span>':'';
-    return`<div class="stab${isActive?' active':''}" style="${style}" onclick="switchStore(${i})">${esc(s.name)}${viewTag}</div>`;
+    return`<div class="stab${isActive?' active':''}" onclick="switchStore(${i})">${esc(s.name)}${viewTag}</div>`;
   }).join('');
   const t=STORE_THEMES[S.store];
+  el.innerHTML=`<div class="tab-seg"><div class="tab-slider" style="background:${t.base};"></div>${tabs}</div>`;
   document.documentElement.style.setProperty('--theme',t.base);
   document.documentElement.style.setProperty('--theme-light',t.light);
   document.documentElement.style.setProperty('--theme-bg',t.bg);
+  // 슬라이더 위치 계산 + 애니메이션
+  requestAnimationFrame(()=>{
+    const seg=el.querySelector('.tab-seg');
+    const activeTab=el.querySelector('.stab.active');
+    const slider=el.querySelector('.tab-slider');
+    if(!seg||!activeTab||!slider)return;
+    const segRect=seg.getBoundingClientRect();
+    const tabRect=activeTab.getBoundingClientRect();
+    const newLeft=tabRect.left-segRect.left;
+    slider.style.width=tabRect.width+'px';
+    if(oldLeft!==null){
+      slider.style.transition='none';
+      slider.style.left=oldLeft+'px';
+      requestAnimationFrame(()=>{
+        slider.style.transition='left .28s cubic-bezier(.4,0,.2,1),background .2s';
+        slider.style.left=newLeft+'px';
+      });
+    }else{
+      slider.style.left=newLeft+'px';
+    }
+  });
 }
-function switchStore(i){SELECTED_DAY=null;S.store=i;save();render();}
+function switchStore(i){
+  SELECTED_DAY=null;S.store=i;save();
+  const cw=document.querySelector('.cal-wrap');
+  if(cw){cw.classList.remove('cal-fade');void cw.offsetWidth;cw.classList.add('cal-fade');}
+  render();
+}
 
 // ── 렌더 ─────────────────────────────────────────────────────────
 function render(){
@@ -1116,6 +1197,8 @@ function render(){
 
   const addBar=document.getElementById('add-staff-bar');
   if(addBar)addBar.style.display=editable?'flex':'none';
+  const calOuter=document.querySelector('.cal-scroll-outer');
+  if(calOuter)calOuter.style.paddingBottom=editable?'0':'calc(58px + env(safe-area-inset-bottom))';
 
   applyDayHighlight();
   renderMsgSection();
@@ -1279,7 +1362,9 @@ function openPwaGuide(){
       </div>`;
   }
 
-  document.getElementById('pwa-guide-overlay').style.display = 'flex';
+  const pge=document.getElementById('pwa-guide-overlay');
+  pge.classList.remove('pop-anim');pge.style.display='flex';
+  void pge.offsetWidth;pge.classList.add('pop-anim');
 }
 
 function closePwaGuide(){
