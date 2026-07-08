@@ -1207,7 +1207,7 @@ function closeClockPopup(){document.getElementById('clock-popup').style.display=
 
 // ── 관리자: 계정 승인 ─────────────────────────────────────────────
 function renderApprovalSection(){
-  const pending=ACCOUNTS.filter(a=>!a.approved);
+  const pending=ACCOUNTS.filter(a=>!a.approved&&CURRENT_ADMIN.editStores.includes(a.storeIdx));
   const badge=document.getElementById('msg-sheet-badge');
   const lbl=document.getElementById('msg-sheet-label');
   const sec=document.getElementById('msg-section');
@@ -1395,7 +1395,7 @@ function renderMsgSection(){
     const badge=document.getElementById('msg-sheet-badge');
     const lbl=document.getElementById('msg-sheet-label');
     lbl.textContent='직원 메시지';
-    const pendingCount=ACCOUNTS.filter(a=>!a.approved).length;
+    const pendingCount=ACCOUNTS.filter(a=>!a.approved&&CURRENT_ADMIN.editStores.includes(a.storeIdx)).length;
     const totalBadge=unreadCnt+pendingCount;
     if(totalBadge>0){badge.textContent=totalBadge;badge.style.display='';}
     else{badge.style.display='none';}
