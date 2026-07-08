@@ -903,9 +903,10 @@ function resolveNotifPrompt(allow){
   if(_notifPromptResolve){_notifPromptResolve(allow);_notifPromptResolve=null;}
 }
 
-// ── 출퇴근 알림 (관리자 전용) ─────────────────────────────────────
+// ── 관리자 알림 폴링 (출퇴근 + 가입신청) ──────────────────────────
 let NOTIF_POLL_TIMER=null;
-let NOTIF_ATTENDANCE_SNAP=null; // 마지막 확인 시점 스냅샷 (JSON 문자열)
+let NOTIF_ATTENDANCE_SNAP=null;
+let NOTIF_ACCOUNTS_SNAP=null;
 
 async function startAttendanceNotifPoll(){
   if(!IS_ADMIN||!CURRENT_ADMIN)return;
@@ -914,51 +915,80 @@ async function startAttendanceNotifPoll(){
     const userWantsNotif=await showNotifPrePrompt();
     if(userWantsNotif) await Notification.requestPermission();
   }
-  // 초기 스냅샷 (로그인 시점 데이터 → 이전 기록 알림 방지)
+  // 초기 스냅샷 (로그인 시점 기준 → 이전 기록 알림 방지)
   NOTIF_ATTENDANCE_SNAP=JSON.stringify(ATTENDANCE);
+  NOTIF_ACCOUNTS_SNAP=JSON.stringify(ACCOUNTS);
   if(NOTIF_POLL_TIMER)clearInterval(NOTIF_POLL_TIMER);
-  NOTIF_POLL_TIMER=setInterval(pollAttendanceForNotif,30000);
+  NOTIF_POLL_TIMER=setInterval(pollAdminNotif,15000); // 15초마다
 }
 
 function stopAttendanceNotifPoll(){
   if(NOTIF_POLL_TIMER){clearInterval(NOTIF_POLL_TIMER);NOTIF_POLL_TIMER=null;}
   NOTIF_ATTENDANCE_SNAP=null;
+  NOTIF_ACCOUNTS_SNAP=null;
 }
 
-async function pollAttendanceForNotif(){
+async function pollAdminNotif(){
   if(!IS_ADMIN||!CURRENT_ADMIN)return;
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/cal_data?id=eq.${ATTENDANCE_ROW_ID}&select=schedule,updated_at`,{headers:SUPA_HDR});
-    if(!res.ok)return;
-    const data=await res.json();
-    const fresh=data[0]?.schedule||[];
-    const oldSnap=JSON.parse(NOTIF_ATTENDANCE_SNAP||'[]');
-    // 변경 없으면 스킵
-    const freshStr=JSON.stringify(fresh);
-    if(freshStr===NOTIF_ATTENDANCE_SNAP)return;
-    // 새 출/퇴근 감지
-    for(const nr of fresh){
-      if(!CURRENT_ADMIN.editStores.includes(nr.storeIdx))continue;
-      const or=oldSnap.find(o=>o.name===nr.name&&o.storeIdx===nr.storeIdx&&o.date===nr.date);
-      if(nr.clockIn&&(!or||!or.clockIn))  fireAttendanceNotif(nr.name,nr.date,nr.clockIn,'출근');
-      if(nr.clockOut&&(!or||!or.clockOut)) fireAttendanceNotif(nr.name,nr.date,nr.clockOut,'퇴근');
+    // ── 출퇴근 감지 ──
+    const attRes=await fetch(`${SUPA_URL}/rest/v1/cal_data?id=eq.${ATTENDANCE_ROW_ID}&select=schedule`,{headers:SUPA_HDR});
+    if(attRes.ok){
+      const attData=await attRes.json();
+      const freshAtt=attData[0]?.schedule||[];
+      const freshAttStr=JSON.stringify(freshAtt);
+      if(freshAttStr!==NOTIF_ATTENDANCE_SNAP){
+        const oldSnap=JSON.parse(NOTIF_ATTENDANCE_SNAP||'[]');
+        for(const nr of freshAtt){
+          if(!CURRENT_ADMIN.editStores.includes(nr.storeIdx))continue;
+          const or=oldSnap.find(o=>o.name===nr.name&&o.storeIdx===nr.storeIdx&&o.date===nr.date);
+          if(nr.clockIn&&(!or||!or.clockIn))  fireNotif('출퇴근',`${nr.name} 님 출근했습니다.`,`att-${nr.name}-${nr.date}-in`);
+          if(nr.clockOut&&(!or||!or.clockOut)) fireNotif('출퇴근',`${nr.name} 님 퇴근했습니다.`,`att-${nr.name}-${nr.date}-out`);
+        }
+        NOTIF_ATTENDANCE_SNAP=freshAttStr;
+        ATTENDANCE=freshAtt;
+        renderDashboard(S.store);
+      }
     }
-    NOTIF_ATTENDANCE_SNAP=freshStr;
-    ATTENDANCE=fresh;
-    renderDashboard(CURRENT_ADMIN?S.store:-1);
+    // ── 가입신청 감지 ──
+    const accRes=await fetch(`${SUPA_URL}/rest/v1/cal_data?id=eq.${ACCOUNTS_ROW_ID}&select=schedule`,{headers:SUPA_HDR});
+    if(accRes.ok){
+      const accData=await accRes.json();
+      const freshAcc=accData[0]?.schedule||[];
+      const freshAccStr=JSON.stringify(freshAcc);
+      if(freshAccStr!==NOTIF_ACCOUNTS_SNAP){
+        const oldAccSnap=JSON.parse(NOTIF_ACCOUNTS_SNAP||'[]');
+        for(const na of freshAcc){
+          if(na.approved)continue;
+          if(!CURRENT_ADMIN.editStores.includes(na.storeIdx))continue;
+          const existed=oldAccSnap.find(o=>o.name===na.name&&o.storeIdx===na.storeIdx&&o.createdAt===na.createdAt);
+          if(!existed){
+            const storeName=STORES[na.storeIdx]?.name||'';
+            fireNotif('가입신청',`${na.name} 님이 ${storeName} 가입을 신청했습니다.`,`reg-${na.name}-${na.createdAt}`);
+          }
+        }
+        NOTIF_ACCOUNTS_SNAP=freshAccStr;
+        ACCOUNTS=freshAcc;
+        renderMsgSection();
+      }
+    }
   }catch(e){}
 }
 
-function fireAttendanceNotif(name,dateStr,timeStr,type){
+function fireNotif(title,body,tag){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
-  const parts=dateStr.split('-').map(Number); // [Y,M,D]
-  const label=`${parts[1]}월 ${parts[2]}일`;
-  new Notification('기억미감 근무 알림',{
-    body:`${name} 님 ${label} ${timeStr} ${type}했습니다.`,
+  new Notification(`기억미감 ${title}`,{
+    body,
     icon:'/migam_staff/icon-192.png',
-    tag:`att-${name}-${dateStr}-${type}`,
+    tag,
     requireInteraction:false,
   });
+}
+
+// 구버전 호환
+function fireAttendanceNotif(name,dateStr,timeStr,type){
+  const parts=dateStr.split('-').map(Number);
+  fireNotif('출퇴근',`${name} 님 ${parts[1]}월 ${parts[2]}일 ${timeStr} ${type}했습니다.`,`att-${name}-${dateStr}-${type}`);
 }
 
 // ── 로그인 탭 전환 ────────────────────────────────────────────────
