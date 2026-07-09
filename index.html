@@ -405,6 +405,17 @@ th.date-num:hover,th.dow:hover{background:rgba(0,0,0,.06) !important;}
 .approval-approve{padding:4px 12px;border-radius:6px;border:none;background:#22c55e;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
 .approval-reject{padding:4px 12px;border-radius:6px;border:1.5px solid #e03030;background:#fff;color:#e03030;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
 </style>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+window.OneSignalDeferred=window.OneSignalDeferred||[];
+OneSignalDeferred.push(async function(OneSignal){
+  await OneSignal.init({
+    appId:'48884d87-6861-4949-ad85-95a6acb22558',
+    serviceWorkerPath:'OneSignalSDKWorker.js',
+    notifyButton:{enable:false},
+  });
+});
+</script>
 </head>
 <body>
 
@@ -858,6 +869,40 @@ async function saveAttendance(){
   fetch(`${SUPA_URL}/rest/v1/cal_data?id=eq.${ATTENDANCE_ROW_ID}`,{method:'PATCH',headers:SUPA_HDR,body:JSON.stringify({schedule:ATTENDANCE,updated_at:new Date().toISOString()})}).catch(()=>{});
 }
 
+// ── OneSignal 푸시 알림 ───────────────────────────────────────────
+const OS_APP_ID='48884d87-6861-4949-ad85-95a6acb22558';
+const OS_REST_KEY='os_v2_app_jcee3b3imfeutlmfswtkzmrfldlhs4shix2uktvdvpipkfrypsoo5l5fmkqmprgsiyf3w4onqkarjhjkjepudnnomwslofhiup3ucui';
+
+function tagAdminForNotif(){
+  if(!IS_ADMIN||!CURRENT_ADMIN)return;
+  window.OneSignalDeferred=window.OneSignalDeferred||[];
+  OneSignalDeferred.push(function(OneSignal){
+    const tags={role:'admin'};
+    CURRENT_ADMIN.editStores.forEach(si=>{tags[`s${si}`]='1';});
+    OneSignal.User.addTags(tags);
+  });
+}
+
+async function sendOneSignalNotif(title,body,storeIdx){
+  try{
+    await fetch('https://onesignal.com/api/v1/notifications',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Basic ${OS_REST_KEY}`},
+      body:JSON.stringify({
+        app_id:OS_APP_ID,
+        filters:[
+          {field:'tag',key:'role',relation:'=',value:'admin'},
+          {operator:'AND'},
+          {field:'tag',key:`s${storeIdx}`,relation:'=',value:'1'}
+        ],
+        headings:{en:title,ko:title},
+        contents:{en:body,ko:body},
+        url:'https://jjiye.github.io/migam_staff/'
+      })
+    });
+  }catch(e){}
+}
+
 // ── 자동로그인 ───────────────────────────────────────────────────
 const AUTO_LOGIN_KEY='migam_autologin_v1';
 function saveAutoLogin(data){localStorage.setItem(AUTO_LOGIN_KEY,JSON.stringify(data));}
@@ -884,6 +929,7 @@ async function tryAutoLogin(){
       await initApp();
       updateGPSUI(true);
       startAttendanceNotifPoll();
+      tagAdminForNotif();
     }
   }catch(e){clearAutoLogin();}
 }
@@ -1029,6 +1075,8 @@ async function submitRegister(){
   if(ACCOUNTS.find(a=>a.name===name&&a.storeIdx===REG_STORE_SEL)){err.textContent='이미 등록된 이름입니다.';return;}
   ACCOUNTS.push({name,storeIdx:REG_STORE_SEL,password:pw,approved:false,createdAt:new Date().toISOString()});
   await saveAccounts();
+  // 가입신청 OneSignal 알림
+  sendOneSignalNotif('기억미감 가입신청',`${name} 님이 ${STORES[REG_STORE_SEL]?.name||''} 가입을 신청했습니다.`,REG_STORE_SEL);
   // 폼 초기화
   document.getElementById('reg-name-inp').value='';
   document.getElementById('reg-pt-chk').checked=false;
@@ -1209,6 +1257,12 @@ async function doClock(type){
     rec.clockOut=timeStr;
   }
   await saveAttendance();
+  // OneSignal 푸시 알림 (관리자에게)
+  sendOneSignalNotif(
+    type==='in'?'기억미감 출근':'기억미감 퇴근',
+    `${name} 님이 ${timeStr} ${type==='in'?'출근':'퇴근'}했습니다.`,
+    storeIdx
+  );
   renderClockTimeRow(storeIdx);
   updateClockBtnState(storeIdx);
   // 퇴근 시 근무 시간 계산
@@ -1718,9 +1772,9 @@ async function submitLogin(){
   document.getElementById('login-overlay').style.display='none';
   document.getElementById('pw-input').value='';
   await initApp();
-  // 관리자는 GPS 불필요, 바로 활성화
   updateGPSUI(true);
   startAttendanceNotifPoll();
+  tagAdminForNotif();
 }
 function doLogout(){
   stopAttendanceNotifPoll();
