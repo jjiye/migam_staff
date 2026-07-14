@@ -2074,15 +2074,8 @@ async function initApp(){
   updateFabVisibility();
 }
 
-// ── 자동로그인 시도 ────────────────────────────────────────────────
-// (구버전: PWA 미설치 모바일 브라우저에서 '홈 화면 추가' 안내를 먼저 띄웠으나,
-//  네이티브 앱(WKWebView) 환경에서 standalone 감지가 불안정해 화면이 멈추는
-//  문제가 있어 제거함. 이제 항상 바로 로그인 화면으로 진입.)
-(function(){
-  document.getElementById('pwa-intro').style.display='none';
-  document.getElementById('login-overlay').style.display='flex';
-  tryAutoLogin();
-})();
+// ── 자동로그인 시도 ──────────────────────────────────────────────
+tryAutoLogin();
 
 // Android Chrome: beforeinstallprompt 저장
 window.addEventListener('beforeinstallprompt', e => {
