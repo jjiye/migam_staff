@@ -2074,18 +2074,14 @@ async function initApp(){
   updateFabVisibility();
 }
 
-// ── PWA 인트로 + 자동로그인 시도 ──────────────────────────────────
+// ── 자동로그인 시도 ────────────────────────────────────────────────
+// (구버전: PWA 미설치 모바일 브라우저에서 '홈 화면 추가' 안내를 먼저 띄웠으나,
+//  네이티브 앱(WKWebView) 환경에서 standalone 감지가 불안정해 화면이 멈추는
+//  문제가 있어 제거함. 이제 항상 바로 로그인 화면으로 진입.)
 (function(){
-  const isStandalone = window.navigator.standalone === true ||
-                       window.matchMedia('(display-mode: standalone)').matches;
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if(isMobile && !isStandalone){
-    document.getElementById('pwa-intro').style.display='flex';
-    document.getElementById('login-overlay').style.display='none';
-  } else {
-    // 자동로그인 (PWA 설치 완료 or 데스크탑)
-    tryAutoLogin();
-  }
+  document.getElementById('pwa-intro').style.display='none';
+  document.getElementById('login-overlay').style.display='flex';
+  tryAutoLogin();
 })();
 
 // Android Chrome: beforeinstallprompt 저장
